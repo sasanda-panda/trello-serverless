@@ -4,12 +4,24 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "next build && next export",
     "start": "next start"
   },
   "dependencies": {
+    "@aws-amplify/api": "^3.2.14",
+    "@aws-amplify/auth": "^3.4.14",
+    "@aws-amplify/core": "^3.8.6",
+    "@aws-amplify/pubsub": "^3.2.12",
+    "@aws-amplify/ui-react": "^0.2.31",
     "next": "10.0.3",
+    "node-sass": "4.14.1",
     "react": "17.0.1",
     "react-dom": "17.0.1"
+  },
+  "devDependencies": {
+    "@types/node": "^14.14.10",
+    "@types/react": "^17.0.0",
+    "@types/react-dom": "^17.0.0",
+    "typescript": "^4.1.2"
   }
 }

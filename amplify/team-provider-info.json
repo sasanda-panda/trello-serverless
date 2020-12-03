@@ -10,6 +10,11 @@
       "StackName": "amplify-trelloserverless-dev-31357",
       "StackId": "arn:aws:cloudformation:ap-northeast-1:942404649943:stack/amplify-trelloserverless-dev-31357/510f8b90-3593-11eb-b745-0677f4f3181e",
       "AmplifyAppId": "d1smdrn8c8t8nh"
+    },
+    "categories": {
+      "auth": {
+        "trelloserverlessf17f5672": {}
+      }
     }
   }
 }

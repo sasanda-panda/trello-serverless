@@ -1,0 +1,46 @@
+# MEMO: https://docs.amplify.aws/cli/graphql-transformer/auth#definition
+
+type Project @model @auth(rules: [{ allow: owner }]) {
+  id: ID!
+  name: String!
+  content: String
+  boards: [Board] @connection(keyName: "byProject", fields: ["id"])
+}
+
+type Board @model @auth(rules: [{ allow: owner }]) @key(name: "byProject", fields: ["projectID"]) {
+  id: ID!
+  name: String!
+  content: String
+  projectID: ID!
+  project: Project @connection(fields: ["projectID"])
+  tasks: [Task] @connection(keyName: "byBoard", fields: ["id"])
+}
+
+type Task @model @auth(rules: [{ allow: owner }]) @key(name: "byBoard", fields: ["boardID", "content"]) {
+  id: ID!
+  name: String!
+  content: String
+  boardID: ID!
+  board: Board @connection(fields: ["boardID"])
+}
+
+# type Blog @model {
+#   id: ID!
+#   name: String!
+#   posts: [Post] @connection(keyName: "byBlog", fields: ["id"])
+# }
+
+# type Post @model @key(name: "byBlog", fields: ["blogID"]) {
+#   id: ID!
+#   title: String!
+#   blogID: ID!
+#   blog: Blog @connection(fields: ["blogID"])
+#   comments: [Comment] @connection(keyName: "byPost", fields: ["id"])
+# }
+
+# type Comment @model @key(name: "byPost", fields: ["postID", "content"]) {
+#   id: ID!
+#   postID: ID!
+#   post: Post @connection(fields: ["postID"])
+#   content: String!
+# }

@@ -1,4 +1,4 @@
-import Auth from '@aws-amplify/auth'
+import Auth, { CognitoUser } from '@aws-amplify/auth'
 import { useEffect, useState } from 'react'
 import { NextPage } from 'next'
 import { useRouter } from 'next/router'
@@ -11,9 +11,7 @@ type AuthenticatedUserType = {
 
 const Profile: NextPage = () => {
 
-  // ログインしているかを判定
-  // true:  ユーザー情報を表示
-  // false: フォームを表示
+  // 
 
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false)
   const [authenticatedUser, setAuthenticatedUser] = useState<AuthenticatedUserType>({ email: '', email_verified: false })
@@ -22,11 +20,13 @@ const Profile: NextPage = () => {
   const [password, setPassword] = useState<string>('')
   const [code, setCode] = useState<string>('')
 
+  // 
+
   const fetchUser = async () => {
     try {
-      const user = await Auth.currentAuthenticatedUser()
+      const authenticatedUser = await Auth.currentAuthenticatedUser()
       setIsAuthenticated(true)
-      setAuthenticatedUser({ email: user.attributes.email, email_verified: user.attibutes.email_verified })
+      setAuthenticatedUser({ email: authenticatedUser.attributes.email, email_verified: authenticatedUser.attributes.email_verified })
     } catch (err) {
       console.log(err)
     }
@@ -36,7 +36,11 @@ const Profile: NextPage = () => {
     fetchUser()
   }, [])
 
+  // 
+
   const router = useRouter()
+
+  // 
 
   const signUp = async () => {
     try {
@@ -86,10 +90,22 @@ const Profile: NextPage = () => {
     }
   }
 
+  // 
+
   return isAuthenticated ? (
     <div>
       <p>Profile - authenticated</p>
       <div>
+        <div>
+          <dl>
+            <dt>Email</dt>
+            <dd>{authenticatedUser.email}</dd>
+          </dl>
+          <dl>
+            <dt>Verification Status</dt>
+            <dd>{authenticatedUser.email_verified ? 'Verified' : 'Not Verified'}</dd>
+          </dl>
+        </div>
         <button onClick={() => signOut()}>signOut</button>
       </div>
     </div>
@@ -101,18 +117,45 @@ const Profile: NextPage = () => {
           switch(authenticationScene) {
             case 'signUp':
               return (
-                <div></div>
+                <div>
+                  <div>
+                    <input type="text" value={username} onChange={(eve) => setUsername(eve.target.value)} />
+                  </div>
+                  <div>
+                    <input type="password" value={password} onChange={(eve) => setPassword(eve.target.value)} />
+                  </div>
+                  <button onClick={() => signUp()}>signUp</button>
+                  <button onClick={() => setAuthenticationScene('signIn')}>switch to signIn</button>
+                </div>
               )
             case 'confirmSignUp':
               return (
-                <div></div>
+                <div>
+                  <div>
+                    <input type="text" value={username} onChange={(eve) => setUsername(eve.target.value)} />
+                  </div>
+                  <div>
+                    <input type="text" value={code} onChange={(eve) => setCode(eve.target.value)} />
+                  </div>
+                  <button onClick={() => confirmSignUp()}>confirmSignUp</button>
+                  <button onClick={() => resendSignUp()}>resendSignUp</button>
+                </div>
               )
             default:
               return (
-                <div></div>
+                <div>
+                  <div>
+                    <input type="text" value={username} onChange={(eve) => setUsername(eve.target.value)} />
+                  </div>
+                  <div>
+                    <input type="password" value={password} onChange={(eve) => setPassword(eve.target.value)} />
+                  </div>
+                  <button onClick={() => signIn()}>signIn</button>
+                  <button onClick={() => setAuthenticationScene('signUp')}>switch to signUp</button>
+                </div>
               )
           }
-        })}
+        })()}
       </div>
     </div>
   )

@@ -69,12 +69,11 @@ const Home: NextPage = () => {
   const createItem = async () => {
     try {
       const id = Math.floor(Math.random() * 999999999999)
-      const inputData = {
-        input: {
-          id, name, content
-        }
+      const inputData = { input: { id, name, content }
       }
       await API.graphql(graphqlOperation(createProject, inputData))
+      setName('')
+      setContent('')
     } catch (err) {
       console.log(err)
     }

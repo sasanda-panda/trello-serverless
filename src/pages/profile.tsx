@@ -85,6 +85,7 @@ const Profile: NextPage = () => {
   const signOut = async () => {
     try {
       await Auth.signOut()
+      router.reload()
     } catch (err) {
       console.log(err)
     }

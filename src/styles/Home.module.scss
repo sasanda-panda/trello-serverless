@@ -1,0 +1,46 @@
+@import './include/variables';
+
+.projects {
+  margin: 8px auto 0;
+  padding: 0 0 32px;
+  width: 1024px;
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.project {
+  padding: 24px;
+  width: 320px;
+  background-color: $COLOR_LIGHT_GREEN;
+  border-radius: 4px;
+  &:nth-child(5n+1) {
+    margin: 32px 16px 0 0;
+  }
+  &:nth-child(5n+2) {
+    margin: 32px 16px 0 16px;
+  }
+  &:nth-child(5n+3) {
+    margin: 32px 0 0 16px;
+  }
+  &:nth-child(5n+4) {
+    margin: 32px 16px 0 176px;
+  }
+  &:nth-child(5n+5) {
+    margin: 32px 176px 0 16px;
+  }
+  a {
+    display: block;
+  }
+  &_head {
+    &_name {
+      font-size: 16px;
+    }
+    &_content {
+      margin: 16px 0 0 0;
+      font-size: 12px;
+    }
+  }
+  &_body {
+    margin: 16px 0 0 0;
+  }
+}

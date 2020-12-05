@@ -1,0 +1,23 @@
+@import '../include/variables';
+
+.navigation {
+  padding: 24px;
+  color: $COLOR_BLACK;
+  background-color: $COLOR_GRAY;
+  display: flex;
+  justify-content: space-between;
+  &_head {
+
+  }
+  &_body {
+    
+  }
+}
+
+.icons {
+  display: flex;
+}
+
+.icon {
+
+}

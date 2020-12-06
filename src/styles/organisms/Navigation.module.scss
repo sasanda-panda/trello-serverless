@@ -1,13 +1,13 @@
 @import '../include/variables';
 
 .navigation {
-  padding: 24px;
+  padding: 16px 32px;
   color: $COLOR_BLACK;
   background-color: $COLOR_GRAY;
   display: flex;
   justify-content: space-between;
   &_head {
-
+    font-size: 24px;
   }
   &_body {
     
@@ -19,7 +19,8 @@
 }
 
 .icon {
+  font-size: 24px;
   & + & {
-    margin: 0 0 0 24px;
+    margin: 0 0 0 16px;
   }
 }

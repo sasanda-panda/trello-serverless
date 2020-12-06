@@ -69,9 +69,8 @@ const Home: NextPage = () => {
   const createItem = async () => {
     try {
       const id = Math.floor(Math.random() * 999999999999)
-      const inputData = { input: { id, name, content }
-      }
-      await API.graphql(graphqlOperation(createProject, inputData))
+      const withData = { input: { id, name, content } }
+      await API.graphql(graphqlOperation(createProject, withData))
       setName('')
       setContent('')
     } catch (err) {
@@ -89,8 +88,8 @@ const Home: NextPage = () => {
 
   const deleteItem = async (id: string) => {
     try {
-      const inputData = { input: { id }}
-      await API.graphql(graphqlOperation(deleteProject, inputData))
+      const withData = { input: { id }}
+      await API.graphql(graphqlOperation(deleteProject, withData))
     } catch (err) {
       console.log(err)
     }

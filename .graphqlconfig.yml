@@ -1,6 +1,6 @@
 projects:
   trelloServerlessApi:
-    schemaPath: src/graphql/schema.json
+    schemaPath: amplify/backend/api/trelloServerlessApi/build/schema.graphql
     includes:
       - src/graphql/**/*.js
     excludes:

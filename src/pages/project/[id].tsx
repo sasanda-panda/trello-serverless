@@ -14,13 +14,38 @@ type AuthenticatedUserType = {
 }
 
 type ProjectType = {
-  owner: string,
   id: string,
   name: string,
-  content?: string,
+  content: string,
+  createdAt: Date,
+  updatedAt: Date,
+  owner: string,
   boards: {
-    items: any[]
+    items: BoardType[]
   }
+}
+
+type BoardType = {
+  id: string,
+  projectID: string,
+  name: string,
+  content: string,
+  createdAt: Date,
+  updatedAt: Date,
+  owner: string,
+  tasks: {
+    items: TaskType[]
+  }
+}
+
+type TaskType = {
+  id: string,
+  boardID: string,
+  name: string,
+  content: string,
+  createdAt: Date,
+  updatedAt: Date,
+  owner: string
 }
 
 const Project: NextPage = () => {

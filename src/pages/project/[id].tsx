@@ -170,6 +170,18 @@ const Project: NextPage = () => {
               <button onClick={() => deleteBoardAsync(board.id)}>deleteBoardAsync</button>
               <div>
                 <button onClick={() => createTaskAsync(board.id)}>createTaskAsync</button>
+                <ul>
+                  {board.tasks.items.map((task) => (
+                    <li key={task.id}>
+                      <div>
+                        {task.name}
+                      </div>
+                      <div>
+                        <button onClick={() => deleteTaskAsync(task.id)}>deleteTaskAsync</button>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
               </div>
             </div>
           </li>

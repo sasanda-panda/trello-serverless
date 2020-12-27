@@ -1,0 +1,23 @@
+@import './include/variables';
+
+.boards {
+  display: flex;
+}
+
+.board {
+  background-color: $COLOR_DARK_BROWN;
+  &_head {
+
+  }
+  &_body {
+
+  }
+}
+
+.tasks {
+  background-color: #fff;
+}
+
+.task {
+  background-color: $COLOR_LIGHT_BROWN;
+}

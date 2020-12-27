@@ -154,7 +154,6 @@ const Project: NextPage = () => {
 
   return isAuthenticated ? (
     <div>
-      <div>Project - authenticated</div>
       <div>
         <input type="text" value={name} onChange={(eve) => setName(eve.target.value)} />
       </div>
@@ -170,9 +169,9 @@ const Project: NextPage = () => {
               <button onClick={() => deleteBoardAsync(board.id)}>deleteBoardAsync</button>
               <div>
                 <button onClick={() => createTaskAsync(board.id)}>createTaskAsync</button>
-                <ul>
+                <ul className={styles.tasks}>
                   {board.tasks.items.map((task) => (
-                    <li key={task.id}>
+                    <li key={task.id} className={styles.task}>
                       <div>
                         {task.name}
                       </div>

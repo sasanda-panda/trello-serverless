@@ -11,8 +11,8 @@
 .project {
   padding: 24px;
   width: 320px;
-  color: $COLOR_WHITE;
-  background-color: $COLOR_DARK_BROWN;
+  color: $COLOR_PRIMARY;
+  background-color: $COLOR_SECONDARY;
   border-radius: 4px;
   &:nth-child(5n+1) {
     margin: 32px 16px 0 0;

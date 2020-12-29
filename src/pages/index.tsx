@@ -8,8 +8,10 @@ import { listProjects } from '../graphql/queries'
 import { createProject, updateProject, deleteProject } from '../graphql/mutations'
 import { onCreateProject, onUpdateProject, onDeleteProject } from '../graphql/subscriptions'
 import styles from '../styles/Home.module.scss'
+import Modal from '../components/organisms/Modal'
 
 type AuthenticatedUserType = {
+  username: string,
   email: string,
   email_verified: boolean
 }
@@ -30,6 +32,10 @@ const Home: NextPage = () => {
 
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false)
   const [authenticatedUser, setAuthenticatedUser] = useState<AuthenticatedUserType>({ email: '', email_verified: false })
+  const [targetProjectID, setTargetProjectID] = useState<string>('')
+  const [isActiveCreateModal, setIsActiveCreateModal] = useState<boolean>(false)
+  const [isActiveUpdateModal, setIsActiveUpdateModal] = useState<boolean>(false)
+  const [isActiveDeleteModal, setIsActiveDeleteModal] = useState<boolean>(false)
   const [name, setName] = useState<string>('')
   const [content, setContent] = useState<string>('')
   const [projects, setProjects] = useState<ProjectType[]>([])
@@ -40,7 +46,7 @@ const Home: NextPage = () => {
     try {
       const authenticatedUser = await Auth.currentAuthenticatedUser()
       setIsAuthenticated(true)
-      setAuthenticatedUser({ email: authenticatedUser.attributes.email, email_verified: authenticatedUser.attributes.email_verified })
+      setAuthenticatedUser({ username: authenticatedUser.username, email: authenticatedUser.attributes.email, email_verified: authenticatedUser.attributes.email_verified })
     } catch (err) {
       console.log(err)
     }
@@ -49,15 +55,49 @@ const Home: NextPage = () => {
   const fetchData = async () => {
     try {
       const data = await API.graphql(graphqlOperation(listProjects))
-      setProjects(data.data.listProjects.items)
+      setProjects(data.data.listProjects.items.sort((a, b) => new Date(b.createdAt).valueOf() - new Date(a.createdAt).valueOf()))
     } catch (err) {
       console.log(err)
+    }
+  }
+
+  const attachSubscription = async () => {
+    const createClient = API.graphql(graphqlOperation(onCreateProject, { owner: (await Auth.currentAuthenticatedUser()).username }))
+    if ("subscribe" in createClient) {
+      createClient.subscribe({
+        next: (result: any) => {
+          setProjects((oldProjects) => {
+            return [ result.value.data.onCreateProject, ...oldProjects ]
+          })
+        }
+      });
+    }
+    const updateClient = API.graphql(graphqlOperation(onUpdateProject, { owner: (await Auth.currentAuthenticatedUser()).username }))
+    if ("subscribe" in updateClient) {
+      updateClient.subscribe({
+        next: (result: any) => {
+          setProjects((oldProjects) => {
+            return oldProjects.map((project) => project.id === result.value.data.onUpdateProject.id ? result.value.data.onUpdateProject : project)
+          })
+        }
+      })
+    }
+    const deleteClient = API.graphql(graphqlOperation(onDeleteProject, { owner: (await Auth.currentAuthenticatedUser()).username }))
+    if ("subscribe" in deleteClient) {
+      deleteClient.subscribe({
+        next: (result: any) => {
+          setProjects((oldProjects) => {
+            return oldProjects.filter((project) => project.id !== result.value.data.onDeleteProject.id)
+          })
+        }
+      })
     }
   }
 
   useEffect(() => {
     fetchUser()
     fetchData()
+    attachSubscription()
   }, [])
 
   // 
@@ -66,6 +106,11 @@ const Home: NextPage = () => {
 
   // 
 
+  // const handleActive = () => {
+  //   setName('')
+  //   setContent('')
+  // }
+
   const createItem = async () => {
     try {
       const id = Math.floor(Math.random() * 999999999999)
@@ -73,23 +118,42 @@ const Home: NextPage = () => {
       await API.graphql(graphqlOperation(createProject, withData))
       setName('')
       setContent('')
+      setIsActiveCreateModal(false)
     } catch (err) {
       console.log(err)
     }
+  }
+
+  const confirmUpdateItem = (id: string, name: string, content: string)  => {
+    setTargetProjectID(id)
+    setName(name)
+    setContent(content)
+    setIsActiveUpdateModal(true)
   }
 
   const updateItem = async () => {
     try {
-
+      const withData = { input: { id: targetProjectID, name, content } }
+      await API.graphql(graphqlOperation(updateProject, withData))
+      setName('')
+      setContent('')
+      setIsActiveUpdateModal(false)
     } catch (err) {
       console.log(err)
     }
   }
 
-  const deleteItem = async (id: string) => {
+  const confirmDeleteItem = (id: string) => {
+    setTargetProjectID(id)
+    setIsActiveDeleteModal(true)
+  }
+
+  const deleteItem = async () => {
     try {
-      const withData = { input: { id }}
+      const withData = { input: { id: targetProjectID }}
       await API.graphql(graphqlOperation(deleteProject, withData))
+      setTargetProjectID('')
+      setIsActiveDeleteModal(false)
     } catch (err) {
       console.log(err)
     }
@@ -99,6 +163,29 @@ const Home: NextPage = () => {
 
   return isAuthenticated ? (
     <div>
+      <Modal
+        isActive={isActiveCreateModal}
+        handleActive={setIsActiveCreateModal}
+      >
+        <input className={styles.input} type="text" placeholder="Project Name" value={name} onChange={(eve) => setName(eve.target.value)}/>
+        <input className={styles.input} type="text" placeholder="Project Content" value={content} onChange={(eve) => setContent(eve.target.value)}/>
+        <button className={`${styles.button} ${styles.button_blue}`} onClick={() => createItem()}>Create</button>
+      </Modal>
+      <Modal
+        isActive={isActiveUpdateModal}
+        handleActive={setIsActiveUpdateModal}
+      >
+        <input className={styles.input} type="text" placeholder="Project Name" value={name} onChange={(eve) => setName(eve.target.value)}/>
+        <input className={styles.input} type="text" placeholder="Project Content" value={content} onChange={(eve) => setContent(eve.target.value)}/>
+        <button className={`${styles.button} ${styles.button_blue}`} onClick={() => updateItem()}>Update</button>
+      </Modal>
+      <Modal
+        isActive={isActiveDeleteModal}
+        handleActive={setIsActiveDeleteModal}
+      >
+        <p className={styles.text}>本当に削除しますか?</p>
+        <button className={`${styles.button} ${styles.button_pink}`} onClick={() => deleteItem()}>Delete</button>
+      </Modal>
       <ul className={styles.projects}>
         {projects.map((project) => (
           <li key={project.id} className={styles.project}>
@@ -109,19 +196,12 @@ const Home: NextPage = () => {
               </div>
             </Link>
             <div className={styles.project_body}>
-            <button onClick={() => deleteItem(project.id)}>deleteItem</button>
+            <button onClick={() => confirmUpdateItem(project.id, project.name, project.content)}>updateItem</button>
+            <button onClick={() => confirmDeleteItem(project.id)}>deleteItem</button>
             </div>
           </li>
         ))}
-        <li className={styles.project}>
-          <div>
-            <input type="text" value={name} onChange={(eve) => setName(eve.target.value)} />
-          </div>
-          <div>
-            <input type="text" value={content} onChange={(eve) => setContent(eve.target.value)} />
-          </div>
-          <button onClick={() => createItem()}>createItem</button>
-        </li>
+        <li className={styles.project} onClick={() => setIsActiveCreateModal(true)}></li>
       </ul>
     </div>
   ) : (

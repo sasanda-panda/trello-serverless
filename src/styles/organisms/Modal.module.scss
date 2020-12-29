@@ -1,0 +1,61 @@
+@import '../include/variables';
+
+.modal {
+  width: 100%;
+  height: 100vh;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  opacity: 0;
+  pointer-events: none;
+  // transition: 0.4s;
+  &_active {
+    opacity: 1;
+    pointer-events: all;
+  }
+  &_container {
+    padding: 40px;
+    background-color: $COLOR_PRIMARY;
+    border-radius: 8px;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 2;
+  }
+  input[type="text"].modal_input {
+    margin: 0 0 24px;
+    padding: 12px;
+    width: 480px;
+    display: block;
+    border: 2px solid $COLOR_ACCENT_GRAY;
+    border-radius: 4px;
+    color: $COLOR_SECONDARY;
+    font-size: 16px;
+    &:focus {
+      border: 2px solid $COLOR_SECONDARY;
+    }
+    &::placeholder {
+      color: $COLOR_ACCENT_GRAY;
+    }
+  }
+  &_button {
+    padding: 12px 16px;
+    border-radius: 4px;
+    color: $COLOR_PRIMARY;
+    background-color: $COLOR_ACCENT_BLUE;
+    font-size: 16px;
+  }
+  &_back {
+    width: 100%;
+    height: 100%;
+    background-color: rgba($COLOR_SECONDARY, 0.5);
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 1;
+    cursor: pointer;
+  }
+}

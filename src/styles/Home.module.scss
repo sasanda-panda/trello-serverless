@@ -1,5 +1,83 @@
 @import './include/variables';
 
+.text {
+  margin: 0 0 24px;
+  width: 480px;
+  display: block;
+  color: $COLOR_ACCENT_PINK;
+  font-size: 16px;
+  text-align: center;
+}
+
+input[type="text"].input {
+  margin: 0 0 24px;
+  padding: 12px;
+  width: 480px;
+  display: block;
+  border: 2px solid $COLOR_ACCENT_GRAY;
+  border-radius: 4px;
+  color: $COLOR_ACCENT_BLUE;
+  font-size: 16px;
+  &:focus {
+    border: 2px solid $COLOR_ACCENT_BLUE;
+  }
+  &::placeholder {
+    color: $COLOR_ACCENT_GRAY;
+  }
+}
+.button {
+  margin: 0 auto;
+  padding: 12px 40px;
+  display: block;
+  border-radius: 4px;
+  color: $COLOR_PRIMARY;
+  font-size: 16px;
+  &_blue {
+    background-color: $COLOR_ACCENT_BLUE;
+  }
+  &_pink {
+    background-color: $COLOR_ACCENT_PINK;
+  }
+}
+
+// .modal {
+//   width: 100%;
+//   height: 100vh;
+//   position: fixed;
+//   top: 50%;
+//   left: 50%;
+//   transform: translate(-50%, -50%);
+//   opacity: 0;
+//   pointer-events: none;
+//   // transition: 0.4s;
+//   &_active {
+//     opacity: 1;
+//     pointer-events: all;
+//   }
+//   &_container {
+//     padding: 40px;
+//     background-color: $COLOR_PRIMARY;
+//     border-radius: 8px;
+//     position: absolute;
+//     top: 50%;
+//     left: 50%;
+//     transform: translate(-50%, -50%);
+//     z-index: 2;
+//   }
+  
+//   &_back {
+//     width: 100%;
+//     height: 100%;
+//     background-color: rgba($COLOR_SECONDARY, 0.5);
+//     position: absolute;
+//     top: 50%;
+//     left: 50%;
+//     transform: translate(-50%, -50%);
+//     z-index: 1;
+//     cursor: pointer;
+//   }
+// }
+
 .projects {
   margin: 8px auto 0;
   padding: 0 0 32px;

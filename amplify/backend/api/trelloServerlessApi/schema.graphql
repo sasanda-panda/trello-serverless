@@ -11,6 +11,7 @@ type Board @model @auth(rules: [{ allow: owner }]) @key(name: "byProject", field
   id: ID!
   name: String!
   content: String
+  order: Int!
   projectID: ID!
   project: Project @connection(fields: ["projectID"])
   tasks: [Task] @connection(keyName: "byBoard", fields: ["id"])
@@ -20,6 +21,7 @@ type Task @model @auth(rules: [{ allow: owner }]) @key(name: "byBoard", fields: 
   id: ID!
   name: String!
   content: String
+  order: Int!
   boardID: ID!
   board: Board @connection(fields: ["boardID"])
 }

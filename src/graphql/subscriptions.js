@@ -12,6 +12,7 @@ export const onCreateProject = /* GraphQL */ `
           id
           name
           content
+          order
           projectID
           createdAt
           updatedAt
@@ -36,6 +37,7 @@ export const onUpdateProject = /* GraphQL */ `
           id
           name
           content
+          order
           projectID
           createdAt
           updatedAt
@@ -60,6 +62,7 @@ export const onDeleteProject = /* GraphQL */ `
           id
           name
           content
+          order
           projectID
           createdAt
           updatedAt
@@ -79,6 +82,7 @@ export const onCreateBoard = /* GraphQL */ `
       id
       name
       content
+      order
       projectID
       project {
         id
@@ -96,6 +100,7 @@ export const onCreateBoard = /* GraphQL */ `
           id
           name
           content
+          order
           boardID
           createdAt
           updatedAt
@@ -115,6 +120,7 @@ export const onUpdateBoard = /* GraphQL */ `
       id
       name
       content
+      order
       projectID
       project {
         id
@@ -132,6 +138,7 @@ export const onUpdateBoard = /* GraphQL */ `
           id
           name
           content
+          order
           boardID
           createdAt
           updatedAt
@@ -151,6 +158,7 @@ export const onDeleteBoard = /* GraphQL */ `
       id
       name
       content
+      order
       projectID
       project {
         id
@@ -168,6 +176,7 @@ export const onDeleteBoard = /* GraphQL */ `
           id
           name
           content
+          order
           boardID
           createdAt
           updatedAt
@@ -187,11 +196,13 @@ export const onCreateTask = /* GraphQL */ `
       id
       name
       content
+      order
       boardID
       board {
         id
         name
         content
+        order
         projectID
         project {
           id
@@ -220,11 +231,13 @@ export const onUpdateTask = /* GraphQL */ `
       id
       name
       content
+      order
       boardID
       board {
         id
         name
         content
+        order
         projectID
         project {
           id
@@ -253,11 +266,13 @@ export const onDeleteTask = /* GraphQL */ `
       id
       name
       content
+      order
       boardID
       board {
         id
         name
         content
+        order
         projectID
         project {
           id

@@ -12,22 +12,11 @@ export const getProject = /* GraphQL */ `
           id
           name
           content
+          order
           projectID
           createdAt
           updatedAt
           owner
-          tasks {
-            items {
-              id
-              name
-              content
-              boardID
-              createdAt
-              updatedAt
-              owner
-            }
-            nextToken
-          }
         }
         nextToken
       }
@@ -65,6 +54,7 @@ export const getBoard = /* GraphQL */ `
       id
       name
       content
+      order
       projectID
       project {
         id
@@ -82,6 +72,7 @@ export const getBoard = /* GraphQL */ `
           id
           name
           content
+          order
           boardID
           createdAt
           updatedAt
@@ -106,6 +97,7 @@ export const listBoards = /* GraphQL */ `
         id
         name
         content
+        order
         projectID
         project {
           id
@@ -132,11 +124,13 @@ export const getTask = /* GraphQL */ `
       id
       name
       content
+      order
       boardID
       board {
         id
         name
         content
+        order
         projectID
         project {
           id
@@ -170,11 +164,13 @@ export const listTasks = /* GraphQL */ `
         id
         name
         content
+        order
         boardID
         board {
           id
           name
           content
+          order
           projectID
           createdAt
           updatedAt

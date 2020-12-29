@@ -2,10 +2,27 @@
 
 .boards {
   display: flex;
+  // padding: 12px 36px 12px 12px;
+  padding: 12px;
+  width: 100%;
+  // width: 200vw;
+  // white-space: nowrap;
+  // margin-bottom: 8px;
+  overflow-x: auto;
+  overflow-y: hidden;
 }
 
 .board {
-  background-color: $COLOR_DARK_BROWN;
+  margin: 0 12px;
+  padding: 24px;
+  width: 240px;
+  background-color: $COLOR_LIGHT_BROWN;
+  // &:last-of-type {
+  //   margin: 0 36px 0 12px;
+  // }
+  &_open {
+    margin: 0 36px 0 12px;
+  }
   &_head {
 
   }
@@ -19,5 +36,6 @@
 }
 
 .task {
-  background-color: $COLOR_LIGHT_BROWN;
+  color: $COLOR_LIGHT_BROWN;
+  background-color: $COLOR_DARK_BROWN;
 }

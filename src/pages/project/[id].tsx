@@ -77,7 +77,7 @@ const Project: NextPage = () => {
   const [isActiveCreateBoardModal, setIsActiveCreateBoardModal] = useState<boolean>(false)
   const [isActiveUpdateBoardModal, setIsActiveUpdateBoardModal] = useState<boolean>(false)
   const [isActiveDeleteBoardModal, setIsActiveDeleteBoardModal] = useState<boolean>(false)
-  const [targetTask, setTargetTask] = useState<string>('')
+  const [targetTask, setTargetTask] = useState<TaskType|null>(null)
   const [isActiveCreateTaskModal, setIsActiveCreateTaskModal] = useState<boolean>(false)
   const [isActiveUpdateTaskModal, setIsActiveUpdateTaskModal] = useState<boolean>(false)
   const [isActiveDeleteTaskModal, setIsActiveDeleteTaskModal] = useState<boolean>(false)
@@ -119,9 +119,9 @@ const Project: NextPage = () => {
   }
 
   const attachSubscription = async () => {
-    const createClient = API.graphql(graphqlOperation(onCreateBoard, { owner: (await Auth.currentAuthenticatedUser()).username }))
-    if ("subscribe" in createClient) {
-      createClient.subscribe({
+    const createBoardClient = API.graphql(graphqlOperation(onCreateBoard, { owner: (await Auth.currentAuthenticatedUser()).username }))
+    if ("subscribe" in createBoardClient) {
+      createBoardClient.subscribe({
         next: (result: any) => {
           setProject((oldProject) => ({
             ...oldProject,
@@ -135,9 +135,9 @@ const Project: NextPage = () => {
         }
       });
     }
-    const updateClient = API.graphql(graphqlOperation(onUpdateBoard, { owner: (await Auth.currentAuthenticatedUser()).username }))
-    if ("subscribe" in updateClient) {
-      updateClient.subscribe({
+    const updateBoardClient = API.graphql(graphqlOperation(onUpdateBoard, { owner: (await Auth.currentAuthenticatedUser()).username }))
+    if ("subscribe" in updateBoardClient) {
+      updateBoardClient.subscribe({
         next: (result: any) => {
           setProject((oldProject) => ({
             ...oldProject,
@@ -148,14 +148,91 @@ const Project: NextPage = () => {
         }
       })
     }
-    const deleteClient = API.graphql(graphqlOperation(onDeleteBoard, { owner: (await Auth.currentAuthenticatedUser()).username }))
-    if ("subscribe" in deleteClient) {
-      deleteClient.subscribe({
+    const deleteBoardClient = API.graphql(graphqlOperation(onDeleteBoard, { owner: (await Auth.currentAuthenticatedUser()).username }))
+    if ("subscribe" in deleteBoardClient) {
+      deleteBoardClient.subscribe({
         next: (result: any) => {
           setProject((oldProject) => ({
             ...oldProject,
             boards: {
               items: oldProject.boards.items.filter((item) => item.id !== result.value.data.onDeleteBoard.id)
+            }
+          }))
+        }
+      })
+    }
+    const createTaskClient = API.graphql(graphqlOperation(onCreateTask, { owner: (await Auth.currentAuthenticatedUser()).username }))
+    if ("subscribe" in createTaskClient) {
+      createTaskClient.subscribe({
+        next: (result: any) => {
+          setProject((oldProject) => ({
+            ...oldProject,
+            boards: {
+              items: oldProject.boards.items.map((item) => {
+                if (item.id === result.value.data.onCreateTask.boardID) {
+                  return {
+                    ...item,
+                    tasks: {
+                      items: [
+                        ...item.tasks.items,
+                        result.value.data.onCreateTask
+                      ]
+                    }
+                  }
+                } else {
+                  return item
+                }
+              })
+            }
+          }))
+        }
+      })
+    }
+    const updateTaskClient = API.graphql(graphqlOperation(onUpdateTask, { owner: (await Auth.currentAuthenticatedUser()).username }))
+    if ("subscribe" in updateTaskClient) {
+      updateTaskClient.subscribe({
+        next: (result: any) => {
+          // result.value.data.onUpdateTask
+          // alert('updateTaskClient')
+          setProject((oldProject) => ({
+            ...oldProject,
+            boards: {
+              items: oldProject.boards.items.map((item) => {
+                if (item.id === result.value.data.onUpdateTask.boardID) {
+                  return {
+                    ...item,
+                    tasks: {
+                      items: item.tasks.items.map((item) => item.id === result.value.data.onUpdateTask.id ? result.value.data.onUpdateTask : item)
+                    }
+                  }
+                } else {
+                  return item
+                }
+              })
+            }
+          }))
+        }
+      })
+    }
+    const deleteTaskClient = API.graphql(graphqlOperation(onDeleteTask, { owner: (await Auth.currentAuthenticatedUser()).username }))
+    if ("subscribe" in deleteTaskClient) {
+      deleteTaskClient.subscribe({
+        next: (result: any) => {
+          setProject((oldProject) => ({
+            ...oldProject,
+            boards: {
+              items: oldProject.boards.items.map((item) => {
+                if (item.id === result.value.data.onDeleteTask.boardID) {
+                  return {
+                    ...item,
+                    tasks: {
+                      items: item.tasks.items.filter((item) => item.id !== result.value.data.onDeleteTask.id)
+                    }
+                  }
+                } else {
+                  return item
+                }
+              })
             }
           }))
         }
@@ -255,18 +332,46 @@ const Project: NextPage = () => {
     }
   }
 
-  const updateTaskAsync = async () => {
-    try {
+  const confirmUpdateTask = (task: TaskType) => {
+    setTargetTask(task)
+    setName(task.name)
+    setContent(task.content)
+    setIsActiveUpdateTaskModal(true)
+  }
 
+  const updateTaskOrderAsync = async (id: string, order: number) => {
+    try {
+      const withData = { input: { id, order } }
+      await API.graphql(graphqlOperation(updateTask, withData))
     } catch (err) {
       console.log(err)
     }
   }
 
-  const deleteTaskAsync = async (id: string) => {
+  const updateTaskAsync = async () => {
     try {
-      const withData = { input: { id } }
+      const withData = { input: { id: targetTask.id, name, content } }
+      await API.graphql(graphqlOperation(updateTask, withData))
+      setName('')
+      setContent('')
+      setTargetTask(null)
+      setIsActiveUpdateTaskModal(false)
+    } catch (err) {
+      console.log(err)
+    }
+  }
+
+  const confirmDeleteTask = (task: TaskType) => {
+    setTargetTask(task)
+    setIsActiveDeleteTaskModal(true)
+  }
+
+  const deleteTaskAsync = async () => {
+    try {
+      const withData = { input: { id: targetTask.id } }
       await API.graphql(graphqlOperation(deleteTask, withData))
+      setTargetTask(null)
+      setIsActiveDeleteTaskModal(false)
     } catch (err) {
       console.log(err)
     }
@@ -274,23 +379,23 @@ const Project: NextPage = () => {
 
   // 
 
-  const Item = ({ item, index }) => {
-    return (
-      <Draggable draggableId={item.id} index={index}>
-        {provided => (
-          <div
-            ref={provided.innerRef}
-            {...provided.draggableProps}
-            {...provided.dragHandleProps}
-          >
-            {item.id}
-          </div>
-        )}
-      </Draggable>
-    );
-  }
+  // const Item = ({ item, index }) => {
+  //   return (
+  //     <Draggable draggableId={item.id} index={index}>
+  //       {provided => (
+  //         <div
+  //           ref={provided.innerRef}
+  //           {...provided.draggableProps}
+  //           {...provided.dragHandleProps}
+  //         >
+  //           {item.id}
+  //         </div>
+  //       )}
+  //     </Draggable>
+  //   );
+  // }
 
-  const onDragEnd = (res) => {
+  const onDragEndBoard = (res) => {
     if (!res.destination) {
       return;
     }
@@ -318,43 +423,44 @@ const Project: NextPage = () => {
 
   }
 
+  const onDragEndTask = (res) => {
+    alert('onDragEndTask')
+  }
+
   return isAuthenticated ? (
     <div>
 
-      <Modal
-        isActive={isActiveCreateBoardModal}
-        handleActive={setIsActiveCreateBoardModal}
-      >
+      <Modal isActive={isActiveCreateBoardModal} handleActive={setIsActiveCreateBoardModal}>
         <input className={styles.input} type="text" placeholder="Board Name" value={name} onChange={(eve) => setName(eve.target.value)}/>
         <input className={styles.input} type="text" placeholder="Board Content" value={content} onChange={(eve) => setContent(eve.target.value)}/>
         <button className={`${styles.button} ${styles.button_blue}`} onClick={() => createBoardAsync()}>Create</button>
       </Modal>
-      <Modal
-        isActive={isActiveUpdateBoardModal}
-        handleActive={setIsActiveUpdateBoardModal}
-      >
+      <Modal isActive={isActiveUpdateBoardModal} handleActive={setIsActiveUpdateBoardModal}>
         <input className={styles.input} type="text" placeholder="Board Name" value={name} onChange={(eve) => setName(eve.target.value)}/>
         <input className={styles.input} type="text" placeholder="Board Content" value={content} onChange={(eve) => setContent(eve.target.value)}/>
         <button className={`${styles.button} ${styles.button_blue}`} onClick={() => updateBoardAsync()}>Update</button>
       </Modal>
-      <Modal
-        isActive={isActiveDeleteBoardModal}
-        handleActive={setIsActiveDeleteBoardModal}
-      >
+      <Modal isActive={isActiveDeleteBoardModal} handleActive={setIsActiveDeleteBoardModal}>
         <p className={styles.text}>本当に削除しますか?</p>
         <button className={`${styles.button} ${styles.button_pink}`} onClick={() => deleteBoardAsync()}>Delete</button>
       </Modal>
 
-      <Modal
-        isActive={isActiveCreateTaskModal}
-        handleActive={setIsActiveCreateTaskModal}
-      >
+      <Modal isActive={isActiveCreateTaskModal} handleActive={setIsActiveCreateTaskModal}>
         <input className={styles.input} type="text" placeholder="Task Name" value={name} onChange={(eve) => setName(eve.target.value)}/>
         <input className={styles.input} type="text" placeholder="Task Content" value={content} onChange={(eve) => setContent(eve.target.value)}/>
         <button className={`${styles.button} ${styles.button_blue}`} onClick={() => createTaskAsync()}>Create</button>
       </Modal>
+      <Modal isActive={isActiveUpdateTaskModal} handleActive={setIsActiveUpdateTaskModal}>
+        <input className={styles.input} type="text" placeholder="Task Name" value={name} onChange={(eve) => setName(eve.target.value)}/>
+        <input className={styles.input} type="text" placeholder="Task Content" value={content} onChange={(eve) => setContent(eve.target.value)}/>
+        <button className={`${styles.button} ${styles.button_blue}`} onClick={() => updateTaskAsync()}>Update</button>
+      </Modal>
+      <Modal isActive={isActiveDeleteTaskModal} handleActive={setIsActiveDeleteTaskModal}>
+        <p className={styles.text}>本当に削除しますか?</p>
+        <button className={`${styles.button} ${styles.button_pink}`} onClick={() => deleteTaskAsync()}>Delete</button>
+      </Modal>
 
-      <DragDropContext onDragEnd={onDragEnd}>
+      <DragDropContext onDragEnd={onDragEndBoard}>
         <Droppable droppableId="boards" direction="horizontal">
           {providedBoardParent => (
             <ul
@@ -372,6 +478,7 @@ const Project: NextPage = () => {
                       {...providedBoardChild.draggableProps}
                       {...providedBoardChild.dragHandleProps}
                     >
+                      <div className={styles.board_tab}></div>
                       <div className={styles.board_head}>{board.name}</div>
                       <div className={styles.board_body}>
                         <div>
@@ -381,29 +488,37 @@ const Project: NextPage = () => {
                           <button onClick={() => confirmDeleteBoard(board)}>Delete Board</button>
                         </div>
                         <div>
-                          <button onClick={() => confirmCreateTask(board)}>createTaskAsync</button>
-                          <Droppable droppableId="tasks" direction="vertical">
-                            {providedTaskParent => (
-                              <ul
-                                className={styles.tasks}
-                                ref={providedTaskParent.innerRef}
-                                {...providedTaskParent.droppableProps}
-                              >
-                                {board?.tasks?.items.map((task, index) => (
-                                  <Draggable draggableId={task.id} index={index}>
-                                  {providedTaskChild => (
-                                    <li
-                                      className={styles.task}
-                                      ref={providedTaskChild.innerRef}
-                                      {...providedTaskChild.draggableProps}
-                                      {...providedTaskChild.dragHandleProps}
-                                  >{task.id}</li>
-                                  )}
-                                </Draggable>
-                                ))}
-                              </ul>
-                            )}
-                          </Droppable>
+                          <button onClick={() => confirmCreateTask(board)}>Create Task</button>
+                          <DragDropContext onDragEnd={onDragEndTask}>
+                            <Droppable droppableId="tasks" direction="vertical">
+                              {providedTaskParent => (
+                                <ul
+                                  className={styles.tasks}
+                                  ref={providedTaskParent.innerRef}
+                                  {...providedTaskParent.droppableProps}
+                                >
+                                  {board?.tasks?.items.map((task, index) => (
+                                    <Draggable draggableId={task.id} index={index}>
+                                    {providedTaskChild => (
+                                      <li
+                                        className={styles.task}
+                                        ref={providedTaskChild.innerRef}
+                                        {...providedTaskChild.draggableProps}
+                                        {...providedTaskChild.dragHandleProps}
+                                      >
+                                        <div>{task.name}</div>
+                                        <div>
+                                          <div><button onClick={() => confirmUpdateTask(task)}>Update Task</button></div>
+                                          <div><button onClick={() => confirmDeleteTask(task)}>Delete Task</button></div>
+                                        </div>
+                                      </li>
+                                    )}
+                                  </Draggable>
+                                  ))}
+                                </ul>
+                              )}
+                            </Droppable>
+                          </DragDropContext>
                           {/* <ul className={styles.tasks}>
                             <li className={styles.task}>aaa</li>
                             <li className={styles.task}>bbb</li>

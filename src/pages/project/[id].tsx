@@ -1,6 +1,6 @@
 import Auth from '@aws-amplify/auth'
 import API, { graphqlOperation, GraphQLResult } from '@aws-amplify/api'
-import React, { useEffect, useState } from 'react'
+import React, { FC, useEffect, useState } from 'react'
 import { NextPage } from 'next'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
@@ -19,7 +19,17 @@ const reorder = (
   const result = Array.from(list);
   const [removed] = result.splice(startIndex, 1);
   result.splice(endIndex, 0, removed);
+  return result;
+};
 
+const reorderTask = (
+  list: TaskType[],
+  startIndex: number,
+  endIndex: number
+): TaskType[] => {
+  const result = Array.from(list);
+  const [removed] = result.splice(startIndex, 1);
+  result.splice(endIndex, 0, removed);
   return result;
 };
 
@@ -63,6 +73,57 @@ type TaskType = {
   createdAt: Date,
   updatedAt: Date,
   owner: string
+}
+
+const DroppableBoard: FC<{onClick: () => void}> = ({ onClick, children }) => {
+  return (
+    <Droppable droppableId="boards-of-project" type="droppableBoard" direction="horizontal">
+      {provided => (
+        <ul className={styles.boards} ref={provided.innerRef} {...provided.droppableProps}>
+          {children}
+          <li className={styles.board} onClick={onClick}>+</li>
+          {provided.placeholder}
+        </ul>
+      )}
+    </Droppable>
+  )
+}
+
+const DraggableBoard: FC<{board: BoardType, index: number}> = ({ board, index, children }) => {
+  return (
+    <Draggable draggableId={board.id} index={index}>
+      {provided => (
+        <li className={styles.board} ref={provided.innerRef} {...provided.draggableProps} {...provided.dragHandleProps}>
+          {children}
+        </li>
+      )}
+    </Draggable>
+  )
+}
+
+const DroppableTask: FC<{board: BoardType}> = ({ board, children }) => {
+  return (
+    <Droppable droppableId={`tasks-of-board-${board.id}`} type="droppableTask" direction="vertical">
+      {provided => (
+        <ul className={styles.tasks} ref={provided.innerRef} {...provided.droppableProps}>
+          {children}
+          {provided.placeholder}
+        </ul>
+      )}
+    </Droppable>
+  )
+}
+
+const DraggableTask: FC<{task: TaskType, index: number}> = ({ task, index, children }) => {
+  return (
+    <Draggable draggableId={task.id} index={index}>
+      {provided => (
+        <li className={styles.task} ref={provided.innerRef} {...provided.draggableProps} {...provided.dragHandleProps}>
+          {children}
+        </li>
+      )}
+    </Draggable>
+  )
 }
 
 const Project: NextPage = () => {
@@ -109,10 +170,8 @@ const Project: NextPage = () => {
       const data = await API.graphql(graphqlOperation(getProject, withData))
       const projectFromData = data.data.getProject
       projectFromData.boards.items.sort((a, b) => a.order - b.order);
+      projectFromData.boards.items.map((item) => item.tasks && item.tasks.items.sort((a, b) => a.order - b.order))
       setProject(projectFromData)
-      console.log(projectFromData)
-      // onDeleteProject
-      // onDeleteTask
     } catch (err) {
       console.log(err)
     }
@@ -339,9 +398,9 @@ const Project: NextPage = () => {
     setIsActiveUpdateTaskModal(true)
   }
 
-  const updateTaskOrderAsync = async (id: string, order: number) => {
+  const updateTaskOrderAsync = async (id: string, order: number, boardID?: string) => {
     try {
-      const withData = { input: { id, order } }
+      const withData = { input: { id, order, boardID } }
       await API.graphql(graphqlOperation(updateTask, withData))
     } catch (err) {
       console.log(err)
@@ -377,165 +436,204 @@ const Project: NextPage = () => {
     }
   }
 
-  // 
+  // https://codesandbox.io/s/5v2yvpjn7n
 
-  // const Item = ({ item, index }) => {
-  //   return (
-  //     <Draggable draggableId={item.id} index={index}>
-  //       {provided => (
-  //         <div
-  //           ref={provided.innerRef}
-  //           {...provided.draggableProps}
-  //           {...provided.dragHandleProps}
-  //         >
-  //           {item.id}
-  //         </div>
-  //       )}
-  //     </Draggable>
-  //   );
-  // }
+  const onDragEnd = (result) => {
 
-  const onDragEndBoard = (res) => {
-    if (!res.destination) {
-      return;
+    // MEMO: 
+    if (!result.destination) return
+
+    if (result.type === 'droppableBoard') {
+
+      // MEMO: boardを移動させた場合
+
+      if (result.destination.index === result.source.index) return
+
+      const items = reorder(
+        project.boards.items,
+        result.source.index,
+        result.destination.index
+      );
+
+      const newProject = {
+        ...project,
+        boards: { items }
+      }
+
+      setProject(newProject);
+
+      newProject.boards.items.forEach((item, index) => {
+        updateBoardOrderAsync(item.id, index);
+      })
+
+    } else if (result.type === 'droppableTask') {
+
+      // MEMO: taskを移動させた場合
+
+      const destinationBoardID = result.destination.droppableId.replace(/tasks-of-board-/g, '')
+      const sourceBoardID = result.source.droppableId.replace(/tasks-of-board-/g, '')
+
+      if (result.destination.droppableId === result.source.droppableId) {
+
+        // MEMO: taskを移動させ、移動先が同じboardだった場合
+
+        if (result.destination.index === result.source.index) return
+
+        const items = reorderTask(
+          project.boards.items.filter((item) => item.id === destinationBoardID)[0].tasks.items,
+          result.source.index,
+          result.destination.index
+        );
+  
+        const newProject = {
+          ...project,
+          boards: {
+            items: project.boards.items.map((item) => {
+              if (item.id === destinationBoardID) {
+                return { ...item, tasks: { items } }
+              } else {
+                return item
+              }
+            })
+          }
+        }
+
+        setProject(newProject);
+
+        newProject.boards.items.filter((item) => item.id === destinationBoardID)[0].tasks.items.forEach((item, index) => {
+          updateTaskOrderAsync(item.id, index);
+        })
+
+      } else {
+
+        // MEMO: taskを移動させ、移動先が別のboardだった場合
+
+        const draggedTask = project
+          .boards.items.filter((item) => item.id === sourceBoardID)[0]
+          .tasks.items.filter((item) => item.id === result.draggableId)[0]
+
+        const destinationItems = project
+            .boards.items.filter((item) => item.id === destinationBoardID)[0]
+            .tasks.items
+        destinationItems.splice(result.destination.index, 0, draggedTask)
+
+        const sourceItems = project
+          .boards.items.filter((item) => item.id === sourceBoardID)[0]
+          .tasks.items.filter((item) => item.id !== draggedTask.id)
+
+        const newProject = {
+          ...project,
+          boards: {
+            items: project.boards.items.map((item) => {
+              if (item.id === destinationBoardID) {
+                return { ...item, tasks: { items: destinationItems } }
+              } else if (item.id === sourceBoardID) {
+                return { ...item, tasks: { items: sourceItems } }
+              } else {
+                return item
+              }
+            })
+          }
+        }
+
+        setProject(newProject)
+
+        newProject.boards.items.filter((item) => item.id === destinationBoardID || item.id === sourceBoardID).forEach((board) => {
+          board.tasks.items.forEach((item, index) => {
+            updateTaskOrderAsync(item.id, index, board.id);
+          })
+        })
+
+      }
+
+    } else {
+
+      return
+
     }
 
-    if (res.destination.index === res.source.index) {
-      return;
-    }
-
-    const items = reorder(
-      project.boards.items,
-      res.source.index,
-      res.destination.index
-    );
-
-    const newProject = {
-      ...project,
-      boards: { items }
-    }
-
-    setProject(newProject);
-
-    newProject.boards.items.forEach((item, index) => {
-      updateBoardOrderAsync(item.id, index);
-    })
-
-  }
-
-  const onDragEndTask = (res) => {
-    alert('onDragEndTask')
   }
 
   return isAuthenticated ? (
     <div>
 
+      {/* MEMO: ボード作成用モーダル */}
       <Modal isActive={isActiveCreateBoardModal} handleActive={setIsActiveCreateBoardModal}>
         <input className={styles.input} type="text" placeholder="Board Name" value={name} onChange={(eve) => setName(eve.target.value)}/>
         <input className={styles.input} type="text" placeholder="Board Content" value={content} onChange={(eve) => setContent(eve.target.value)}/>
         <button className={`${styles.button} ${styles.button_blue}`} onClick={() => createBoardAsync()}>Create</button>
       </Modal>
+
+      {/* MEMO: ボード更新用モーダル */}
       <Modal isActive={isActiveUpdateBoardModal} handleActive={setIsActiveUpdateBoardModal}>
         <input className={styles.input} type="text" placeholder="Board Name" value={name} onChange={(eve) => setName(eve.target.value)}/>
         <input className={styles.input} type="text" placeholder="Board Content" value={content} onChange={(eve) => setContent(eve.target.value)}/>
         <button className={`${styles.button} ${styles.button_blue}`} onClick={() => updateBoardAsync()}>Update</button>
       </Modal>
+
+      {/* MEMO: ボード削除用モーダル */}
       <Modal isActive={isActiveDeleteBoardModal} handleActive={setIsActiveDeleteBoardModal}>
         <p className={styles.text}>本当に削除しますか?</p>
         <button className={`${styles.button} ${styles.button_pink}`} onClick={() => deleteBoardAsync()}>Delete</button>
       </Modal>
 
+      {/* MEMO: タスク作成用モーダル */}
       <Modal isActive={isActiveCreateTaskModal} handleActive={setIsActiveCreateTaskModal}>
         <input className={styles.input} type="text" placeholder="Task Name" value={name} onChange={(eve) => setName(eve.target.value)}/>
         <input className={styles.input} type="text" placeholder="Task Content" value={content} onChange={(eve) => setContent(eve.target.value)}/>
         <button className={`${styles.button} ${styles.button_blue}`} onClick={() => createTaskAsync()}>Create</button>
       </Modal>
+
+      {/* MEMO: タスク更新用モーダル */}
       <Modal isActive={isActiveUpdateTaskModal} handleActive={setIsActiveUpdateTaskModal}>
         <input className={styles.input} type="text" placeholder="Task Name" value={name} onChange={(eve) => setName(eve.target.value)}/>
         <input className={styles.input} type="text" placeholder="Task Content" value={content} onChange={(eve) => setContent(eve.target.value)}/>
         <button className={`${styles.button} ${styles.button_blue}`} onClick={() => updateTaskAsync()}>Update</button>
       </Modal>
+
+      {/* MEMO: タスク削除用モーダル */}
       <Modal isActive={isActiveDeleteTaskModal} handleActive={setIsActiveDeleteTaskModal}>
         <p className={styles.text}>本当に削除しますか?</p>
         <button className={`${styles.button} ${styles.button_pink}`} onClick={() => deleteTaskAsync()}>Delete</button>
       </Modal>
 
-      <DragDropContext onDragEnd={onDragEndBoard}>
-        <Droppable droppableId="boards" direction="horizontal">
-          {providedBoardParent => (
-            <ul
-              className={styles.boards}
-              ref={providedBoardParent.innerRef}
-              {...providedBoardParent.droppableProps}
-            >
-              {project?.boards?.items.map((board, index) => (
-                <Draggable draggableId={board.id} index={index} key={board.id}>
-                  {providedBoardChild => (
-                    <li 
-                      key={board.id}
-                      className={styles.board}
-                      ref={providedBoardChild.innerRef}
-                      {...providedBoardChild.draggableProps}
-                      {...providedBoardChild.dragHandleProps}
-                    >
-                      <div className={styles.board_tab}></div>
-                      <div className={styles.board_head}>{board.name}</div>
-                      <div className={styles.board_body}>
-                        <div>
-                          <button onClick={() => confirmUpdateBoard(board)}>Update Board</button>
-                        </div>
-                        <div>
-                          <button onClick={() => confirmDeleteBoard(board)}>Delete Board</button>
-                        </div>
-                        <div>
-                          <button onClick={() => confirmCreateTask(board)}>Create Task</button>
-                          <DragDropContext onDragEnd={onDragEndTask}>
-                            <Droppable droppableId="tasks" direction="vertical">
-                              {providedTaskParent => (
-                                <ul
-                                  className={styles.tasks}
-                                  ref={providedTaskParent.innerRef}
-                                  {...providedTaskParent.droppableProps}
-                                >
-                                  {board?.tasks?.items.map((task, index) => (
-                                    <Draggable draggableId={task.id} index={index}>
-                                    {providedTaskChild => (
-                                      <li
-                                        className={styles.task}
-                                        ref={providedTaskChild.innerRef}
-                                        {...providedTaskChild.draggableProps}
-                                        {...providedTaskChild.dragHandleProps}
-                                      >
-                                        <div>{task.name}</div>
-                                        <div>
-                                          <div><button onClick={() => confirmUpdateTask(task)}>Update Task</button></div>
-                                          <div><button onClick={() => confirmDeleteTask(task)}>Delete Task</button></div>
-                                        </div>
-                                      </li>
-                                    )}
-                                  </Draggable>
-                                  ))}
-                                </ul>
-                              )}
-                            </Droppable>
-                          </DragDropContext>
-                          {/* <ul className={styles.tasks}>
-                            <li className={styles.task}>aaa</li>
-                            <li className={styles.task}>bbb</li>
-                            <li className={styles.task}>ccc</li>
-                          </ul> */}
-                        </div>
-                      </div>
-                    </li>
-                  )}
-                </Draggable>
-              ))}
-              <li className={`${styles.board} ${styles.board_open}`} onClick={() => setIsActiveCreateBoardModal(true)}>+</li>
-              {providedBoardParent.placeholder}
-            </ul>
-          )}
-        </Droppable>
+      <DragDropContext onDragEnd={onDragEnd}>
+        <DroppableBoard onClick={() => setIsActiveCreateBoardModal(true)}>
+          {project?.boards?.items.map((board, index) => (
+            <DraggableBoard board={board} index={index} key={board.id}>
+              <>
+                <div className={styles.board_tab}></div>
+                <div className={styles.board_head}>{board.name}</div>
+                <div className={styles.board_body}>
+                  <div>
+                    <button onClick={() => confirmUpdateBoard(board)}>Update Board</button>
+                  </div>
+                  <div>
+                    <button onClick={() => confirmDeleteBoard(board)}>Delete Board</button>
+                  </div>
+                  <div>
+                    <button onClick={() => confirmCreateTask(board)}>Create Task</button>
+                      <DroppableTask board={board}>
+                        {board?.tasks?.items.map((task, index) => (
+                          <DraggableTask task={task} index={index} key={task.id}>
+                            <>
+                              <div>{task.name}</div>
+                              <div>
+                                <div><button onClick={() => confirmUpdateTask(task)}>Update Task</button></div>
+                                <div><button onClick={() => confirmDeleteTask(task)}>Delete Task</button></div>
+                              </div>
+                            </>
+                          </DraggableTask>
+                        ))}
+                      </DroppableTask>
+                  </div>
+                </div>
+              </>
+            </DraggableBoard>
+          ))}
+        </DroppableBoard>
       </DragDropContext>
+
     </div>
   ) : (
     <div>

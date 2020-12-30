@@ -1,24 +1,68 @@
 @import './include/variables';
 
+.text {
+  margin: 0 0 24px;
+  width: 480px;
+  display: block;
+  color: $COLOR_ACCENT_PINK;
+  font-size: 16px;
+  text-align: center;
+}
+
+input[type="text"].input {
+  margin: 0 0 24px;
+  padding: 12px;
+  width: 480px;
+  display: block;
+  border: 2px solid $COLOR_ACCENT_GRAY;
+  border-radius: 4px;
+  color: $COLOR_ACCENT_BLUE;
+  font-size: 16px;
+  &:focus {
+    border: 2px solid $COLOR_ACCENT_BLUE;
+  }
+  &::placeholder {
+    color: $COLOR_ACCENT_GRAY;
+  }
+}
+
+.button {
+  margin: 0 auto;
+  padding: 12px 40px;
+  display: block;
+  border-radius: 4px;
+  color: $COLOR_PRIMARY;
+  font-size: 16px;
+  &_blue {
+    background-color: $COLOR_ACCENT_BLUE;
+  }
+  &_pink {
+    background-color: $COLOR_ACCENT_PINK;
+  }
+}
+
 .boards {
   display: flex;
   padding: 12px;
-  width: 100%;
+  width: 200vw;
   overflow-x: scroll;
   overflow-y: hidden;
 }
 
 .board {
   margin: 0 12px;
-  padding: 24px;
+  padding: 24px 16px 16px;
   width: 240px;
+  min-height: calc(100vh - 80px);
   color: $COLOR_PRIMARY;
   background-color: $COLOR_SECONDARY;
+  border-radius: 4px;
   // &:last-of-type {
   //   margin: 0 36px 0 12px;
   // }
   &_open {
     margin: 0 36px 0 12px;
+    // min-height: auto;
   }
   &_head {
 
@@ -29,10 +73,15 @@
 }
 
 .tasks {
-  background-color: #fff;
+  // color: $COLOR_SECONDARY;
+  // background-color: $COLOR_ACCENT_BLUE;
 }
 
 .task {
-  color: $COLOR_ACCENT_BLUE;
-  background-color: $COLOR_ACCENT_GRAY;
+  margin: 16px 0;
+  padding: 16px;
+  color: $COLOR_PRIMARY;
+  background-color: $COLOR_ACCENT_BLUE;
+  border-radius: 4px;
+  font-size: 16px;
 }

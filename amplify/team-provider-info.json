@@ -22,5 +22,29 @@
                 }
             }
         }
+    },
+    "prod": {
+        "awscloudformation": {
+            "AuthRoleName": "amplify-trelloserverless-prod-145836-authRole",
+            "UnauthRoleArn": "arn:aws:iam::942404649943:role/amplify-trelloserverless-prod-145836-unauthRole",
+            "AuthRoleArn": "arn:aws:iam::942404649943:role/amplify-trelloserverless-prod-145836-authRole",
+            "Region": "ap-northeast-1",
+            "DeploymentBucketName": "amplify-trelloserverless-prod-145836-deployment",
+            "UnauthRoleName": "amplify-trelloserverless-prod-145836-unauthRole",
+            "StackName": "amplify-trelloserverless-prod-145836",
+            "StackId": "arn:aws:cloudformation:ap-northeast-1:942404649943:stack/amplify-trelloserverless-prod-145836/39736f10-4b2d-11eb-a080-0afff3dcfee2",
+            "AmplifyAppId": "d1smdrn8c8t8nh"
+        },
+        "categories": {
+            "auth": {
+                "trelloserverlessf17f5672": {}
+            },
+            "hosting": {
+                "amplifyhosting": {
+                    "appId": "d1smdrn8c8t8nh",
+                    "type": "manual"
+                }
+            }
+        }
     }
 }

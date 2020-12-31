@@ -17,18 +17,6 @@ export const getProject = /* GraphQL */ `
           createdAt
           updatedAt
           owner
-          tasks {
-            items {
-              id
-              name
-              content
-              order
-              boardID
-              createdAt
-              updatedAt
-              owner
-            }
-          }
         }
         nextToken
       }

@@ -246,6 +246,7 @@ const Project: NextPage = () => {
             boards: {
               items: oldProject.boards.items.map((item) => {
                 if (item.id === result.value.data.onCreateTask.boardID) {
+                  console.log(item)
                   return {
                     ...item,
                     tasks: {

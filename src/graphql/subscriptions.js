@@ -213,6 +213,13 @@ export const onCreateTask = /* GraphQL */ `
           owner
         }
         tasks {
+          items {
+            id
+            name
+            content
+            order
+            boardID
+          }
           nextToken
         }
         createdAt

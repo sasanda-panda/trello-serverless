@@ -49,6 +49,11 @@
         background-color: $COLOR_PRIMARY;
         border: 2px solid $COLOR_ACCENT_BLUE;
       }
+      &:first-of-type {
+        color: $COLOR_PRIMARY;
+      background-color: $COLOR_ACCENT_BLUE;
+        border: 2px solid $COLOR_ACCENT_BLUE;
+      }
     }
   }
 }

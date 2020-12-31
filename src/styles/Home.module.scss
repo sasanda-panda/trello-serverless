@@ -39,6 +39,10 @@ input[type="text"].input {
   &_pink {
     background-color: $COLOR_ACCENT_PINK;
   }
+  &_disable {
+    opacity: 0.5;
+    pointer-events: none;
+  }
 }
 
 // .modal {

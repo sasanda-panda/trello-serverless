@@ -1,6 +1,7 @@
 import Auth from '@aws-amplify/auth'
 import API, { graphqlOperation, GraphQLResult } from '@aws-amplify/api'
 import React, { FC, useEffect, useState } from 'react'
+import { AiOutlinePlus, AiOutlineEdit, AiOutlineDelete } from 'react-icons/ai'
 import { NextPage } from 'next'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
@@ -75,13 +76,13 @@ type TaskType = {
   owner: string
 }
 
-const DroppableBoard: FC<{onClick: () => void}> = ({ onClick, children }) => {
+const DroppableBoard: FC<{project: ProjectType, onClick: () => void}> = ({ project, onClick, children }) => {
   return (
     <Droppable droppableId="boards-of-project" type="droppableBoard" direction="horizontal">
       {provided => (
-        <ul className={styles.boards} ref={provided.innerRef} {...provided.droppableProps}>
+        <ul className={styles.boards} style={{ width: ((project.boards.items.length + 1) * 240) + ((project.boards.items.length) * 16) + (32 * 2) }} ref={provided.innerRef} {...provided.droppableProps}>
           {children}
-          <li className={styles.board} onClick={onClick} ></li>
+          <li className={`${styles.board} ${styles.board_last}`} onClick={onClick}><AiOutlinePlus /></li>
           {provided.placeholder}
         </ul>
       )}
@@ -101,12 +102,13 @@ const DraggableBoard: FC<{board: BoardType, index: number}> = ({ board, index, c
   )
 }
 
-const DroppableTask: FC<{board: BoardType}> = ({ board, children }) => {
+const DroppableTask: FC<{board: BoardType, onClick: () => void}> = ({ board, onClick, children }) => {
   return (
     <Droppable droppableId={`tasks-of-board-${board.id}`} type="droppableTask" direction="vertical">
       {provided => (
         <ul className={styles.tasks} ref={provided.innerRef} {...provided.droppableProps}>
           {children}
+          <li className={`${styles.task} ${styles.task_last}`} onClick={onClick}><AiOutlinePlus /></li>
           {provided.placeholder}
         </ul>
       )}
@@ -132,6 +134,7 @@ const Project: NextPage = () => {
   // true:  listTasksを実行
   // false: /profile/へ遷移
 
+  const [isLoaded, setIsLoaded] = useState<boolean>(false)
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false)
   const [authenticatedUser, setAuthenticatedUser] = useState<AuthenticatedUserType>({ email: '', email_verified: false })
   const [targetBoard, setTargetBoard] = useState<BoardType|null>(null)
@@ -145,6 +148,18 @@ const Project: NextPage = () => {
   const [name, setName] = useState<string>('')
   const [content, setContent] = useState<string>('')
   const [project, setProject] = useState<ProjectType|null>(null)
+  const [navigateSeconds, setNavigateSeconds] = useState<number>(3)
+
+  const wait = (seconds) => new Promise((resolve) => setTimeout(resolve, seconds))
+
+  const navigateToProfile = async () => {
+    await wait(1000)
+    setNavigateSeconds(2)
+    await wait(1000)
+    setNavigateSeconds(1)
+    await wait(1000)
+    router.push('/profile')
+  }
 
   // 
 
@@ -159,7 +174,8 @@ const Project: NextPage = () => {
       setIsAuthenticated(true)
       setAuthenticatedUser({ email: authenticatedUser.attributes.email, email_verified: authenticatedUser.attributes.email_verified })
     } catch (err) {
-      console.log(err)
+      setIsLoaded(true)
+      navigateToProfile()
     }
   }
 
@@ -172,6 +188,7 @@ const Project: NextPage = () => {
       projectFromData.boards.items.sort((a, b) => a.order - b.order);
       projectFromData.boards.items.map((item) => item.tasks && item.tasks.items.sort((a, b) => a.order - b.order))
       setProject(projectFromData)
+      setIsLoaded(true)
     } catch (err) {
       console.log(err)
     }
@@ -554,90 +571,100 @@ const Project: NextPage = () => {
 
   }
 
-  return isAuthenticated ? (
-    <div>
-
-      {/* MEMO: ボード作成用モーダル */}
-      <Modal isActive={isActiveCreateBoardModal} handleActive={setIsActiveCreateBoardModal}>
-        <input className={styles.input} type="text" placeholder="Board name" value={name} onChange={(eve) => setName(eve.target.value)}/>
-        <input className={styles.input} type="text" placeholder="Board content" value={content} onChange={(eve) => setContent(eve.target.value)}/>
-        <button className={`${styles.button} ${styles.button_blue}`} onClick={() => createBoardAsync()}>Create</button>
-      </Modal>
-
-      {/* MEMO: ボード更新用モーダル */}
-      <Modal isActive={isActiveUpdateBoardModal} handleActive={setIsActiveUpdateBoardModal}>
-        <input className={styles.input} type="text" placeholder="Board name" value={name} onChange={(eve) => setName(eve.target.value)}/>
-        <input className={styles.input} type="text" placeholder="Board content" value={content} onChange={(eve) => setContent(eve.target.value)}/>
-        <button className={`${styles.button} ${styles.button_blue}`} onClick={() => updateBoardAsync()}>Update</button>
-      </Modal>
-
-      {/* MEMO: ボード削除用モーダル */}
-      <Modal isActive={isActiveDeleteBoardModal} handleActive={setIsActiveDeleteBoardModal}>
-        <p className={styles.text}>本当に削除しますか?</p>
-        <button className={`${styles.button} ${styles.button_pink}`} onClick={() => deleteBoardAsync()}>Delete</button>
-      </Modal>
-
-      {/* MEMO: タスク作成用モーダル */}
-      <Modal isActive={isActiveCreateTaskModal} handleActive={setIsActiveCreateTaskModal}>
-        <input className={styles.input} type="text" placeholder="Task name" value={name} onChange={(eve) => setName(eve.target.value)}/>
-        <input className={styles.input} type="text" placeholder="Task content" value={content} onChange={(eve) => setContent(eve.target.value)}/>
-        <button className={`${styles.button} ${styles.button_blue}`} onClick={() => createTaskAsync()}>Create</button>
-      </Modal>
-
-      {/* MEMO: タスク更新用モーダル */}
-      <Modal isActive={isActiveUpdateTaskModal} handleActive={setIsActiveUpdateTaskModal}>
-        <input className={styles.input} type="text" placeholder="Task name" value={name} onChange={(eve) => setName(eve.target.value)}/>
-        <input className={styles.input} type="text" placeholder="Task content" value={content} onChange={(eve) => setContent(eve.target.value)}/>
-        <button className={`${styles.button} ${styles.button_blue}`} onClick={() => updateTaskAsync()}>Update</button>
-      </Modal>
-
-      {/* MEMO: タスク削除用モーダル */}
-      <Modal isActive={isActiveDeleteTaskModal} handleActive={setIsActiveDeleteTaskModal}>
-        <p className={styles.text}>本当に削除しますか?</p>
-        <button className={`${styles.button} ${styles.button_pink}`} onClick={() => deleteTaskAsync()}>Delete</button>
-      </Modal>
-
-      <DragDropContext onDragEnd={onDragEnd}>
-        <DroppableBoard onClick={() => setIsActiveCreateBoardModal(true)}>
-          {project?.boards?.items.map((board, index) => (
-            <DraggableBoard board={board} index={index} key={board.id}>
-              <>
-                <div className={styles.board_tab}></div>
-                <div className={styles.board_head}>{board.name}</div>
-                <div className={styles.board_body}>
-                  <div>
-                    <button onClick={() => confirmUpdateBoard(board)}>Update Board</button>
+  return isLoaded ? (
+    isAuthenticated ? (
+      <div>
+  
+        {/* MEMO: ボード作成用モーダル */}
+        <Modal isActive={isActiveCreateBoardModal} handleActive={setIsActiveCreateBoardModal}>
+          <input className={styles.input} type="text" placeholder="Board name" value={name} onChange={(eve) => setName(eve.target.value)}/>
+          <input className={styles.input} type="text" placeholder="Board content" value={content} onChange={(eve) => setContent(eve.target.value)}/>
+          <button className={`${styles.button} ${styles.button_blue} ${(name && content) ? '' : styles.button_disable}`} onClick={() => createBoardAsync()}>Create</button>
+        </Modal>
+  
+        {/* MEMO: ボード更新用モーダル */}
+        <Modal isActive={isActiveUpdateBoardModal} handleActive={setIsActiveUpdateBoardModal}>
+          <input className={styles.input} type="text" placeholder="Board name" value={name} onChange={(eve) => setName(eve.target.value)}/>
+          <input className={styles.input} type="text" placeholder="Board content" value={content} onChange={(eve) => setContent(eve.target.value)}/>
+          <button className={`${styles.button} ${styles.button_blue} ${(name && content) ? '' : styles.button_disable}`} onClick={() => updateBoardAsync()}>Update</button>
+        </Modal>
+  
+        {/* MEMO: ボード削除用モーダル */}
+        <Modal isActive={isActiveDeleteBoardModal} handleActive={setIsActiveDeleteBoardModal}>
+          <p className={styles.text}>本当に削除しますか?</p>
+          <button className={`${styles.button} ${styles.button_pink}`} onClick={() => deleteBoardAsync()}>Delete</button>
+        </Modal>
+  
+        {/* MEMO: タスク作成用モーダル */}
+        <Modal isActive={isActiveCreateTaskModal} handleActive={setIsActiveCreateTaskModal}>
+          <input className={styles.input} type="text" placeholder="Task name" value={name} onChange={(eve) => setName(eve.target.value)}/>
+          <input className={styles.input} type="text" placeholder="Task content" value={content} onChange={(eve) => setContent(eve.target.value)}/>
+          <button className={`${styles.button} ${styles.button_blue} ${(name && content) ? '' : styles.button_disable}`} onClick={() => createTaskAsync()}>Create</button>
+        </Modal>
+  
+        {/* MEMO: タスク更新用モーダル */}
+        <Modal isActive={isActiveUpdateTaskModal} handleActive={setIsActiveUpdateTaskModal}>
+          <input className={styles.input} type="text" placeholder="Task name" value={name} onChange={(eve) => setName(eve.target.value)}/>
+          <input className={styles.input} type="text" placeholder="Task content" value={content} onChange={(eve) => setContent(eve.target.value)}/>
+          <button className={`${styles.button} ${styles.button_blue} ${(name && content) ? '' : styles.button_disable}`} onClick={() => updateTaskAsync()}>Update</button>
+        </Modal>
+  
+        {/* MEMO: タスク削除用モーダル */}
+        <Modal isActive={isActiveDeleteTaskModal} handleActive={setIsActiveDeleteTaskModal}>
+          <p className={styles.text}>本当に削除しますか?</p>
+          <button className={`${styles.button} ${styles.button_pink}`} onClick={() => deleteTaskAsync()}>Delete</button>
+        </Modal>
+  
+        <DragDropContext onDragEnd={onDragEnd}>
+          <DroppableBoard project={project} onClick={() => setIsActiveCreateBoardModal(true)}>
+            {project?.boards?.items.map((board, index) => (
+              <DraggableBoard board={board} index={index} key={board.id}>
+                <>
+                  <div className={styles.board_tab}></div>
+                  <div className={styles.board_head}>{board.name}</div>
+                  <div className={styles.board_body}>
+                    <button onClick={() => confirmUpdateBoard(board)}><AiOutlineEdit /></button>
+                    <button onClick={() => confirmDeleteBoard(board)}><AiOutlineDelete /></button>
+                    <div>
+                      {/* <button onClick={() => confirmCreateTask(board)}>Create Task</button> */}
+                        <DroppableTask board={board} onClick={() => confirmCreateTask(board)}>
+                          {board?.tasks?.items.map((task, index) => (
+                            <DraggableTask task={task} index={index} key={task.id}>
+                              <>
+                                <div className={styles.task_head}>
+                                  {task.name}
+                                </div>
+                                <div className={styles.task_body}>
+                                  <button onClick={() => confirmUpdateTask(task)}><AiOutlineEdit /></button>
+                                  <button onClick={() => confirmDeleteTask(task)}><AiOutlineDelete /></button>
+                                </div>
+                              </>
+                            </DraggableTask>
+                          ))}
+                        </DroppableTask>
+                    </div>
                   </div>
-                  <div>
-                    <button onClick={() => confirmDeleteBoard(board)}>Delete Board</button>
-                  </div>
-                  <div>
-                    <button onClick={() => confirmCreateTask(board)}>Create Task</button>
-                      <DroppableTask board={board}>
-                        {board?.tasks?.items.map((task, index) => (
-                          <DraggableTask task={task} index={index} key={task.id}>
-                            <>
-                              <div>{task.name}</div>
-                              <div>
-                                <div><button onClick={() => confirmUpdateTask(task)}>Update Task</button></div>
-                                <div><button onClick={() => confirmDeleteTask(task)}>Delete Task</button></div>
-                              </div>
-                            </>
-                          </DraggableTask>
-                        ))}
-                      </DroppableTask>
-                  </div>
-                </div>
-              </>
-            </DraggableBoard>
-          ))}
-        </DroppableBoard>
-      </DragDropContext>
-
-    </div>
+                </>
+              </DraggableBoard>
+            ))}
+          </DroppableBoard>
+        </DragDropContext>
+  
+      </div>
+    ) : (
+      <div>
+        <p className={styles.navigate}>Sign in is required.</p>
+        <p className={styles.navigate}><span className={styles.navigate__bold}>{navigateSeconds}</span> seconds later you will be on your way.</p>
+      </div>
+    )
   ) : (
     <div>
-      <div>Project - not authenticated</div>
+      {/* <ul className={styles.boards}>
+        <li className={styles.board}></li>
+        <li className={styles.board}></li>
+        <li className={styles.board}></li>
+        <li className={styles.board}></li>
+      </ul> */}
     </div>
   )
 }

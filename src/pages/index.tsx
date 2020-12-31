@@ -185,7 +185,7 @@ const Home: NextPage = () => {
         >
           <input className={styles.input} type="text" placeholder="Project name" value={name} onChange={(eve) => setName(eve.target.value)}/>
           <input className={styles.input} type="text" placeholder="Project content" value={content} onChange={(eve) => setContent(eve.target.value)}/>
-          <button className={`${styles.button} ${styles.button_blue}`} onClick={() => createItem()}>Create</button>
+          <button className={`${styles.button} ${styles.button_blue} ${(name && content) ? '' : styles.button_disable}`} onClick={() => createItem()}>Create</button>
         </Modal>
         <Modal
           isActive={isActiveUpdateModal}
@@ -193,7 +193,7 @@ const Home: NextPage = () => {
         >
           <input className={styles.input} type="text" placeholder="Project name" value={name} onChange={(eve) => setName(eve.target.value)}/>
           <input className={styles.input} type="text" placeholder="Project content" value={content} onChange={(eve) => setContent(eve.target.value)}/>
-          <button className={`${styles.button} ${styles.button_blue}`} onClick={() => updateItem()}>Update</button>
+          <button className={`${styles.button} ${styles.button_blue} ${(name && content) ? '' : styles.button_disable}`} onClick={() => updateItem()}>Update</button>
         </Modal>
         <Modal
           isActive={isActiveDeleteModal}
@@ -227,16 +227,18 @@ const Home: NextPage = () => {
       </div>
     )
   ) : (
-    <ul className={styles.projects}>
-      <li className={styles.project}></li>
-      <li className={styles.project}></li>
-      <li className={styles.project}></li>
-      <li className={styles.project}></li>
-      <li className={styles.project}></li>
-      <li className={styles.project}></li>
-      <li className={styles.project}></li>
-      <li className={styles.project}></li>
-    </ul>
+    <div>
+      {/* <ul className={styles.projects}>
+        <li className={styles.project}></li>
+        <li className={styles.project}></li>
+        <li className={styles.project}></li>
+        <li className={styles.project}></li>
+        <li className={styles.project}></li>
+        <li className={styles.project}></li>
+        <li className={styles.project}></li>
+        <li className={styles.project}></li>
+      </ul> */}
+    </div>
   )
 }
 

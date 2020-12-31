@@ -39,28 +39,38 @@ input[type="text"].input {
   &_pink {
     background-color: $COLOR_ACCENT_PINK;
   }
+  &_disable {
+    opacity: 0.5;
+    pointer-events: none;
+  }
 }
 
 .boards {
   margin: 32px 0 0 0;
-  padding: 0 24px;
+  padding: 0 24px 32px;
+  min-height: calc(100vh - 124px);
   display: flex;
-  width: 200vw;
   overflow-x: scroll;
   overflow-y: hidden;
+  position: relative;
+  &::-webkit-scrollbar {
+    display: none;
+  }
 }
 
 .board {
   margin: 0 8px;
-  padding: 24px 16px 16px;
+  padding: 22px 14px 14px;
   width: 240px;
-  min-height: calc(100vh - 80px);
+  min-height: calc(100vh - 124px);
   color: $COLOR_PRIMARY;
   background-color: $COLOR_SECONDARY;
+  border: 2px solid $COLOR_SECONDARY;
   border-radius: 4px;
   // &:last-of-type {
   //   margin: 0 36px 0 12px;
   // }
+  position: relative;
   &_open {
     margin: 0 36px 0 12px;
     // min-height: auto;
@@ -69,6 +79,32 @@ input[type="text"].input {
 
   }
   &_body {
+    > button {
+      margin: 8px 8px 0 0;
+      color: rgba($COLOR_PRIMARY, 0.5);
+    }
+  }
+
+  &_last {
+    padding: 20px 14px;
+    color: $COLOR_SECONDARY;
+    background-color: $COLOR_PRIMARY;
+    text-align: center;
+    font-size: 24px;
+    cursor: pointer;
+    position: absolute;
+    top: 0;
+    right: 24px;
+    svg {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+    }
+  }
+  &:hover .task_last {
+    opacity: 1;
+    pointer-events: all;
   }
 }
 
@@ -76,14 +112,44 @@ input[type="text"].input {
   // color: $COLOR_SECONDARY;
   // background-color: $COLOR_ACCENT_BLUE;
   margin: 16px 0 0 0;
-  min-height: 82px;
+  min-height: 72px;
 }
 
 .task {
   margin: 0 0 16px 0;
-  padding: 16px;
+  padding: 14px;
   color: $COLOR_PRIMARY;
   background-color: $COLOR_ACCENT_BLUE;
+  border: 2px solid $COLOR_ACCENT_BLUE;
   border-radius: 4px;
   font-size: 16px;
+  &_body {
+    > button {
+      margin: 8px 8px 0 0;
+      color: rgba($COLOR_PRIMARY, 0.625);
+    }
+  }
+  &_last {
+    padding: 20px 14px;
+    color: $COLOR_ACCENT_BLUE;
+    background-color: $COLOR_SECONDARY;
+    text-align: center;
+    font-size: 24px;
+    transition: 0.4s;
+    opacity: 0;
+    pointer-events: none;
+  }
+}
+
+.navigate {
+  margin: 48px 0 0 0;
+  color: $COLOR_SECONDARY;
+  font-size: 16px;
+  text-align: center;
+  & + & {
+    margin: 24px 0 0 0;
+  }
+  &__bold {
+    font-weight: 700;
+  }
 }

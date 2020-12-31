@@ -6,11 +6,11 @@ import { NextPage } from 'next'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd'
-import { getProject } from '../../../graphql/queries'
-import { createBoard, updateBoard, deleteBoard, createTask, updateTask, deleteTask } from '../../../graphql/mutations'
-import styles from '../../../styles/Project.module.scss'
-import { onCreateBoard, onUpdateBoard, onDeleteProject, onCreateTask, onUpdateTask, onDeleteTask, onDeleteBoard } from '../../../graphql/subscriptions'
-import Modal from '../../../components/organisms/Modal'
+import { getProject } from '../../graphql/queries'
+import { createBoard, updateBoard, deleteBoard, createTask, updateTask, deleteTask } from '../../graphql/mutations'
+import styles from '../../styles/Project.module.scss'
+import { onCreateBoard, onUpdateBoard, onDeleteProject, onCreateTask, onUpdateTask, onDeleteTask, onDeleteBoard } from '../../graphql/subscriptions'
+import Modal from '../../components/organisms/Modal'
 
 const reorder = (
   list: BoardType[],

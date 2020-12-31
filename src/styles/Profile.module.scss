@@ -1,0 +1,54 @@
+@import './include/variables';
+
+.profile {
+  margin: 64px auto 0;
+  padding: 0 32px;
+  width: 720px;
+  &_head {
+    input[type="text"], input[type="password"] {
+      margin: 0 0 24px;
+      padding: 12px;
+      width: 720px;
+      display: block;
+      border: 2px solid $COLOR_ACCENT_GRAY;
+      border-radius: 4px;
+      color: $COLOR_ACCENT_BLUE;
+      font-size: 16px;
+      &:focus {
+        border: 2px solid $COLOR_ACCENT_BLUE;
+      }
+      &::placeholder {
+        color: $COLOR_ACCENT_GRAY;
+      }
+    }
+    dl {
+      margin: 32px 0 0 0;
+      display: flex;
+      dt {
+        width: 220px;
+      }
+      dd {
+        width: 500px;
+        font-weight: 700;
+      }
+    }
+  }
+  &_body {
+    margin: 32px 0 0;
+    button {
+      margin: 0 32px 0 0;
+      padding: 16px 40px;
+      display: inline-block;
+      border: 2px solid $COLOR_ACCENT_BLUE;
+      border-radius: 4px;
+      color: $COLOR_PRIMARY;
+      background-color: $COLOR_ACCENT_BLUE;
+      font-size: 16px;
+      &:last-of-type {
+        color: $COLOR_ACCENT_BLUE;
+        background-color: $COLOR_PRIMARY;
+        border: 2px solid $COLOR_ACCENT_BLUE;
+      }
+    }
+  }
+}

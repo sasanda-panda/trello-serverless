@@ -1,6 +1,7 @@
 import Auth from '@aws-amplify/auth'
 import API, { graphqlOperation, GraphQLResult } from '@aws-amplify/api'
 import { useEffect, useState } from 'react'
+import { AiOutlinePlus, AiOutlineEdit, AiOutlineDelete } from 'react-icons/ai'
 import { NextPage } from 'next'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
@@ -30,6 +31,7 @@ const Home: NextPage = () => {
   // true:  listProjectsを実行
   // false: /profile/へ遷移
 
+  const [isLoaded, setIsLoaded] = useState<boolean>(false)
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false)
   const [authenticatedUser, setAuthenticatedUser] = useState<AuthenticatedUserType>({ email: '', email_verified: false })
   const [targetProjectID, setTargetProjectID] = useState<string>('')
@@ -39,6 +41,18 @@ const Home: NextPage = () => {
   const [name, setName] = useState<string>('')
   const [content, setContent] = useState<string>('')
   const [projects, setProjects] = useState<ProjectType[]>([])
+  const [navigateSeconds, setNavigateSeconds] = useState<number>(3)
+
+  const wait = (seconds) => new Promise((resolve) => setTimeout(resolve, seconds))
+
+  const navigateToProfile = async () => {
+    await wait(1000)
+    setNavigateSeconds(2)
+    await wait(1000)
+    setNavigateSeconds(1)
+    await wait(1000)
+    router.push('/profile')
+  }
 
   // 
 
@@ -48,7 +62,8 @@ const Home: NextPage = () => {
       setIsAuthenticated(true)
       setAuthenticatedUser({ username: authenticatedUser.username, email: authenticatedUser.attributes.email, email_verified: authenticatedUser.attributes.email_verified })
     } catch (err) {
-      console.log(err)
+      setIsLoaded(true)
+      navigateToProfile()
     }
   }
 
@@ -56,6 +71,7 @@ const Home: NextPage = () => {
     try {
       const data = await API.graphql(graphqlOperation(listProjects))
       setProjects(data.data.listProjects.items.sort((a, b) => new Date(b.createdAt).valueOf() - new Date(a.createdAt).valueOf()))
+      setIsLoaded(true)
     } catch (err) {
       console.log(err)
     }
@@ -161,54 +177,67 @@ const Home: NextPage = () => {
 
   // 
 
-  return isAuthenticated ? (
-    <div>
-      <Modal
-        isActive={isActiveCreateModal}
-        handleActive={setIsActiveCreateModal}
-      >
-        <input className={styles.input} type="text" placeholder="Project Name" value={name} onChange={(eve) => setName(eve.target.value)}/>
-        <input className={styles.input} type="text" placeholder="Project Content" value={content} onChange={(eve) => setContent(eve.target.value)}/>
-        <button className={`${styles.button} ${styles.button_blue}`} onClick={() => createItem()}>Create</button>
-      </Modal>
-      <Modal
-        isActive={isActiveUpdateModal}
-        handleActive={setIsActiveUpdateModal}
-      >
-        <input className={styles.input} type="text" placeholder="Project Name" value={name} onChange={(eve) => setName(eve.target.value)}/>
-        <input className={styles.input} type="text" placeholder="Project Content" value={content} onChange={(eve) => setContent(eve.target.value)}/>
-        <button className={`${styles.button} ${styles.button_blue}`} onClick={() => updateItem()}>Update</button>
-      </Modal>
-      <Modal
-        isActive={isActiveDeleteModal}
-        handleActive={setIsActiveDeleteModal}
-      >
-        <p className={styles.text}>本当に削除しますか?</p>
-        <button className={`${styles.button} ${styles.button_pink}`} onClick={() => deleteItem()}>Delete</button>
-      </Modal>
-      <ul className={styles.projects}>
-        {projects.map((project) => (
-          <li key={project.id} className={styles.project}>
-            <Link href={`/project/${project.id}`}>
-              <div className={styles.project_head}>
-                <div className={styles.project_head_name}>{project.name}</div>
-                <div className={styles.project_head_content}>{project.content}</div>
+  return isLoaded ? (
+    isAuthenticated ? (
+      <div>
+        <Modal
+          isActive={isActiveCreateModal}
+          handleActive={setIsActiveCreateModal}
+        >
+          <input className={styles.input} type="text" placeholder="Project Name" value={name} onChange={(eve) => setName(eve.target.value)}/>
+          <input className={styles.input} type="text" placeholder="Project Content" value={content} onChange={(eve) => setContent(eve.target.value)}/>
+          <button className={`${styles.button} ${styles.button_blue}`} onClick={() => createItem()}>Create</button>
+        </Modal>
+        <Modal
+          isActive={isActiveUpdateModal}
+          handleActive={setIsActiveUpdateModal}
+        >
+          <input className={styles.input} type="text" placeholder="Project Name" value={name} onChange={(eve) => setName(eve.target.value)}/>
+          <input className={styles.input} type="text" placeholder="Project Content" value={content} onChange={(eve) => setContent(eve.target.value)}/>
+          <button className={`${styles.button} ${styles.button_blue}`} onClick={() => updateItem()}>Update</button>
+        </Modal>
+        <Modal
+          isActive={isActiveDeleteModal}
+          handleActive={setIsActiveDeleteModal}
+        >
+          <p className={styles.text}>本当に削除しますか?</p>
+          <button className={`${styles.button} ${styles.button_pink}`} onClick={() => deleteItem()}>Delete</button>
+        </Modal>
+        <ul className={styles.projects}>
+          {projects.map((project) => (
+            <li key={project.id} className={styles.project}>
+              <Link href={`/project/${project.id}`}>
+                <div className={styles.project_head}>
+                  <div className={styles.project_head_name}>{project.name}</div>
+                  <div className={styles.project_head_content}>{project.content}</div>
+                </div>
+              </Link>
+              <div className={styles.project_body}>
+                <button className={styles.project_body_button} onClick={() => confirmUpdateItem(project.id, project.name, project.content)}><AiOutlineEdit /></button>
+                <button className={styles.project_body_button} onClick={() => confirmDeleteItem(project.id)}><AiOutlineDelete /></button>
               </div>
-            </Link>
-            <div className={styles.project_body}>
-            <button onClick={() => confirmUpdateItem(project.id, project.name, project.content)}>updateItem</button>
-            <button onClick={() => confirmDeleteItem(project.id)}>deleteItem</button>
-            </div>
-          </li>
-        ))}
-        <li className={styles.project} onClick={() => setIsActiveCreateModal(true)}></li>
-      </ul>
-    </div>
+            </li>
+          ))}
+          <li className={`${styles.project} ${styles.project_last}`} onClick={() => setIsActiveCreateModal(true)}><AiOutlinePlus /></li>
+        </ul>
+      </div>
+    ) : (
+      <div>
+        <p className={styles.navigate}>Sign in is required.</p>
+        <p className={styles.navigate}><span className={styles.navigate__bold}>{navigateSeconds}</span> seconds later you will be on your way.</p>
+      </div>
+    )
   ) : (
-    <div>
-      <div>Home - not authenticated</div>
-      <div>go profile</div>
-    </div>
+    <ul className={styles.projects}>
+      <li className={styles.project}></li>
+      <li className={styles.project}></li>
+      <li className={styles.project}></li>
+      <li className={styles.project}></li>
+      <li className={styles.project}></li>
+      <li className={styles.project}></li>
+      <li className={styles.project}></li>
+      <li className={styles.project}></li>
+    </ul>
   )
 }
 

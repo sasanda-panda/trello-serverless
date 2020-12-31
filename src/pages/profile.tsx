@@ -76,7 +76,7 @@ const Profile: NextPage = () => {
   const signIn = async () => {
     try {
       await Auth.signIn(username, password)
-      router.reload()
+      router.push('/')
     } catch (err) {
       console.log(err)
     }
@@ -94,70 +94,78 @@ const Profile: NextPage = () => {
   // 
 
   return isAuthenticated ? (
-    <div>
-      <p>Profile - authenticated</p>
-      <div>
-        <div>
-          <dl>
-            <dt>Email</dt>
-            <dd>{authenticatedUser.email}</dd>
-          </dl>
-          <dl>
-            <dt>Verification Status</dt>
-            <dd>{authenticatedUser.email_verified ? 'Verified' : 'Not Verified'}</dd>
-          </dl>
-        </div>
+    <div className={styles.profile}>
+      <div className={styles.profile_head}>
+        <dl>
+          <dt>Email</dt>
+          <dd>{authenticatedUser.email}</dd>
+        </dl>
+        <dl>
+          <dt>Verification Status</dt>
+          <dd>{authenticatedUser.email_verified ? 'Verified' : 'Not Verified'}</dd>
+        </dl>
+      </div>
+      <div className={styles.profile_body}>
         <button onClick={() => signOut()}>signOut</button>
       </div>
     </div>
   ) : (
-    <div>
-      <p>Profile - not authenticated</p>
-      <div>
-        {(() => {
-          switch(authenticationScene) {
-            case 'signUp':
-              return (
-                <div>
+    <div className={styles.profile}>
+      {(() => {
+        switch(authenticationScene) {
+          case 'signUp':
+            return (
+              <>
+                <div className={styles.profile_head}>
                   <div>
-                    <input type="text" value={username} onChange={(eve) => setUsername(eve.target.value)} />
+                    <input type="text" placeholder="Email" value={username} onChange={(eve) => setUsername(eve.target.value)} />
                   </div>
                   <div>
-                    <input type="password" value={password} onChange={(eve) => setPassword(eve.target.value)} />
+                    <input type="password" placeholder="Password" value={password} onChange={(eve) => setPassword(eve.target.value)} />
                   </div>
-                  <button onClick={() => signUp()}>signUp</button>
-                  <button onClick={() => setAuthenticationScene('signIn')}>switch to signIn</button>
                 </div>
-              )
-            case 'confirmSignUp':
-              return (
-                <div>
-                  <div>
-                    <input type="text" value={username} onChange={(eve) => setUsername(eve.target.value)} />
-                  </div>
-                  <div>
-                    <input type="text" value={code} onChange={(eve) => setCode(eve.target.value)} />
-                  </div>
-                  <button onClick={() => confirmSignUp()}>confirmSignUp</button>
-                  <button onClick={() => resendSignUp()}>resendSignUp</button>
+                <div className={styles.profile_body}>
+                  <button onClick={() => signUp()}>Sign up</button>
+                  <button onClick={() => setAuthenticationScene('signIn')}>Sign in</button>
                 </div>
-              )
-            default:
-              return (
-                <div>
+              </>
+            )
+          case 'confirmSignUp':
+            return (
+              <>
+                <div className={styles.profile_head}>
                   <div>
-                    <input type="text" value={username} onChange={(eve) => setUsername(eve.target.value)} />
+                    <input type="text" placeholder="Email" value={username} onChange={(eve) => setUsername(eve.target.value)} />
                   </div>
                   <div>
-                    <input type="password" value={password} onChange={(eve) => setPassword(eve.target.value)} />
+                    <input type="text" placeholder="Code" value={code} onChange={(eve) => setCode(eve.target.value)} />
                   </div>
-                  <button onClick={() => signIn()}>signIn</button>
-                  <button onClick={() => setAuthenticationScene('signUp')}>switch to signUp</button>
                 </div>
-              )
-          }
-        })()}
-      </div>
+                <div className={styles.profile_body}>
+                  <button onClick={() => confirmSignUp()}>Confirm Sign up</button>
+                  <button onClick={() => resendSignUp()}>Resend sign up</button>
+                </div>
+              </>
+            )
+          default:
+            return (
+              <>
+                <div className={styles.profile_head}>
+                  <div>
+                    <input type="text" placeholder="Email" value={username} onChange={(eve) => setUsername(eve.target.value)} />
+                  </div>
+                  <div>
+                    <input type="password" placeholder="Password" value={password} onChange={(eve) => setPassword(eve.target.value)} />
+                  </div>
+                </div>
+                <div className={styles.profile_body}>
+                  <button onClick={() => signIn()}>Sign in</button>
+                  <button onClick={() => setAuthenticationScene('signUp')}>Sign up</button>
+                </div>
+              </>
+            )
+        }
+      })()}
     </div>
   )
 }

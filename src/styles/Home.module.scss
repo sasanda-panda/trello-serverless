@@ -85,14 +85,17 @@ input[type="text"].input {
   width: 1024px;
   display: flex;
   flex-wrap: wrap;
+  position: relative;
+  z-index: 1;
 }
 
 .project {
-  padding: 24px;
   width: 320px;
+  min-height: 128px;
   color: $COLOR_PRIMARY;
   background-color: $COLOR_SECONDARY;
   border-radius: 4px;
+  position: relative;
   &:nth-child(5n+1) {
     margin: 32px 16px 0 0;
   }
@@ -108,10 +111,25 @@ input[type="text"].input {
   &:nth-child(5n+5) {
     margin: 32px 176px 0 16px;
   }
+  &_last {
+    cursor: pointer;
+    border: 2px solid $COLOR_SECONDARY;
+    background-color: $COLOR_PRIMARY;
+    svg {
+      color: $COLOR_SECONDARY;
+      font-size: 24px;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+    }
+  }
   a {
     display: block;
   }
   &_head {
+    padding: 24px 24px 0 24px;
+    cursor: pointer;
     &_name {
       font-size: 16px;
     }
@@ -121,6 +139,25 @@ input[type="text"].input {
     }
   }
   &_body {
+    padding: 0 24px 24px 24px;
     margin: 16px 0 0 0;
+    &_button {
+      margin: 0 8px 0 0;
+      color: rgba($COLOR_PRIMARY, 0.5);
+      font-size: 16px;
+    }
+  }
+}
+
+.navigate {
+  margin: 48px 0 0 0;
+  color: $COLOR_SECONDARY;
+  font-size: 16px;
+  text-align: center;
+  & + & {
+    margin: 24px 0 0 0;
+  }
+  &__bold {
+    font-weight: 700;
   }
 }

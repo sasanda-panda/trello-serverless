@@ -81,7 +81,7 @@ const DroppableBoard: FC<{onClick: () => void}> = ({ onClick, children }) => {
       {provided => (
         <ul className={styles.boards} ref={provided.innerRef} {...provided.droppableProps}>
           {children}
-          <li className={styles.board} onClick={onClick}>+</li>
+          <li className={styles.board} onClick={onClick} ></li>
           {provided.placeholder}
         </ul>
       )}

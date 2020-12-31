@@ -12,7 +12,6 @@ import styles from '../styles/Home.module.scss'
 import Modal from '../components/organisms/Modal'
 
 type AuthenticatedUserType = {
-  username: string,
   email: string,
   email_verified: boolean
 }
@@ -60,7 +59,7 @@ const Home: NextPage = () => {
     try {
       const authenticatedUser = await Auth.currentAuthenticatedUser()
       setIsAuthenticated(true)
-      setAuthenticatedUser({ username: authenticatedUser.username, email: authenticatedUser.attributes.email, email_verified: authenticatedUser.attributes.email_verified })
+      setAuthenticatedUser({ email: authenticatedUser.attributes.email, email_verified: authenticatedUser.attributes.email_verified })
     } catch (err) {
       setIsLoaded(true)
       navigateToProfile()
@@ -69,7 +68,7 @@ const Home: NextPage = () => {
 
   const fetchData = async () => {
     try {
-      const data = await API.graphql(graphqlOperation(listProjects))
+      const data: any = await API.graphql(graphqlOperation(listProjects))
       setProjects(data.data.listProjects.items.sort((a, b) => new Date(b.createdAt).valueOf() - new Date(a.createdAt).valueOf()))
       setIsLoaded(true)
     } catch (err) {
@@ -184,16 +183,16 @@ const Home: NextPage = () => {
           isActive={isActiveCreateModal}
           handleActive={setIsActiveCreateModal}
         >
-          <input className={styles.input} type="text" placeholder="Project Name" value={name} onChange={(eve) => setName(eve.target.value)}/>
-          <input className={styles.input} type="text" placeholder="Project Content" value={content} onChange={(eve) => setContent(eve.target.value)}/>
+          <input className={styles.input} type="text" placeholder="Project name" value={name} onChange={(eve) => setName(eve.target.value)}/>
+          <input className={styles.input} type="text" placeholder="Project content" value={content} onChange={(eve) => setContent(eve.target.value)}/>
           <button className={`${styles.button} ${styles.button_blue}`} onClick={() => createItem()}>Create</button>
         </Modal>
         <Modal
           isActive={isActiveUpdateModal}
           handleActive={setIsActiveUpdateModal}
         >
-          <input className={styles.input} type="text" placeholder="Project Name" value={name} onChange={(eve) => setName(eve.target.value)}/>
-          <input className={styles.input} type="text" placeholder="Project Content" value={content} onChange={(eve) => setContent(eve.target.value)}/>
+          <input className={styles.input} type="text" placeholder="Project name" value={name} onChange={(eve) => setName(eve.target.value)}/>
+          <input className={styles.input} type="text" placeholder="Project content" value={content} onChange={(eve) => setContent(eve.target.value)}/>
           <button className={`${styles.button} ${styles.button_blue}`} onClick={() => updateItem()}>Update</button>
         </Modal>
         <Modal

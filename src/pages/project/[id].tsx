@@ -167,7 +167,7 @@ const Project: NextPage = () => {
     try {
       const { id } = router.query
       const withData = { id }
-      const data = await API.graphql(graphqlOperation(getProject, withData))
+      const data: any = await API.graphql(graphqlOperation(getProject, withData))
       const projectFromData = data.data.getProject
       projectFromData.boards.items.sort((a, b) => a.order - b.order);
       projectFromData.boards.items.map((item) => item.tasks && item.tasks.items.sort((a, b) => a.order - b.order))
@@ -559,15 +559,15 @@ const Project: NextPage = () => {
 
       {/* MEMO: ボード作成用モーダル */}
       <Modal isActive={isActiveCreateBoardModal} handleActive={setIsActiveCreateBoardModal}>
-        <input className={styles.input} type="text" placeholder="Board Name" value={name} onChange={(eve) => setName(eve.target.value)}/>
-        <input className={styles.input} type="text" placeholder="Board Content" value={content} onChange={(eve) => setContent(eve.target.value)}/>
+        <input className={styles.input} type="text" placeholder="Board name" value={name} onChange={(eve) => setName(eve.target.value)}/>
+        <input className={styles.input} type="text" placeholder="Board content" value={content} onChange={(eve) => setContent(eve.target.value)}/>
         <button className={`${styles.button} ${styles.button_blue}`} onClick={() => createBoardAsync()}>Create</button>
       </Modal>
 
       {/* MEMO: ボード更新用モーダル */}
       <Modal isActive={isActiveUpdateBoardModal} handleActive={setIsActiveUpdateBoardModal}>
-        <input className={styles.input} type="text" placeholder="Board Name" value={name} onChange={(eve) => setName(eve.target.value)}/>
-        <input className={styles.input} type="text" placeholder="Board Content" value={content} onChange={(eve) => setContent(eve.target.value)}/>
+        <input className={styles.input} type="text" placeholder="Board name" value={name} onChange={(eve) => setName(eve.target.value)}/>
+        <input className={styles.input} type="text" placeholder="Board content" value={content} onChange={(eve) => setContent(eve.target.value)}/>
         <button className={`${styles.button} ${styles.button_blue}`} onClick={() => updateBoardAsync()}>Update</button>
       </Modal>
 
@@ -579,15 +579,15 @@ const Project: NextPage = () => {
 
       {/* MEMO: タスク作成用モーダル */}
       <Modal isActive={isActiveCreateTaskModal} handleActive={setIsActiveCreateTaskModal}>
-        <input className={styles.input} type="text" placeholder="Task Name" value={name} onChange={(eve) => setName(eve.target.value)}/>
-        <input className={styles.input} type="text" placeholder="Task Content" value={content} onChange={(eve) => setContent(eve.target.value)}/>
+        <input className={styles.input} type="text" placeholder="Task name" value={name} onChange={(eve) => setName(eve.target.value)}/>
+        <input className={styles.input} type="text" placeholder="Task content" value={content} onChange={(eve) => setContent(eve.target.value)}/>
         <button className={`${styles.button} ${styles.button_blue}`} onClick={() => createTaskAsync()}>Create</button>
       </Modal>
 
       {/* MEMO: タスク更新用モーダル */}
       <Modal isActive={isActiveUpdateTaskModal} handleActive={setIsActiveUpdateTaskModal}>
-        <input className={styles.input} type="text" placeholder="Task Name" value={name} onChange={(eve) => setName(eve.target.value)}/>
-        <input className={styles.input} type="text" placeholder="Task Content" value={content} onChange={(eve) => setContent(eve.target.value)}/>
+        <input className={styles.input} type="text" placeholder="Task name" value={name} onChange={(eve) => setName(eve.target.value)}/>
+        <input className={styles.input} type="text" placeholder="Task content" value={content} onChange={(eve) => setContent(eve.target.value)}/>
         <button className={`${styles.button} ${styles.button_blue}`} onClick={() => updateTaskAsync()}>Update</button>
       </Modal>
 
